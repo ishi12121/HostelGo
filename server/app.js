@@ -7,9 +7,9 @@ const cookieparser = require("cookie-parser");
 const morgan = require("morgan");
 
 const app = express();
-
-app.use(bodyparser.urlencoded({ extended: true }));
 app.use(bodyparser.json());
+app.use(bodyparser.urlencoded({ extended: true }));
+
 app.use(cookieparser());
 
 const corsOptions = {
@@ -17,6 +17,16 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
+
+// Custom token to log request body
+morgan.token("body", (req) => {
+  return JSON.stringify(req.body);
+});
+
+// Custom token to log cookies
+morgan.token("cookies", (req) => {
+  return JSON.stringify(req.cookies);
+});
 
 // Custom Morgan for logging
 app.use(
@@ -30,6 +40,8 @@ app.use(
       `IP: ${tokens["remote-addr"](req, res)}`,
       `User-Agent: ${tokens["user-agent"](req, res)}`,
       `Timestamp: ${new Date().toISOString()}`,
+      `Payload: ${tokens.body(req, res)}`, // Log the request body
+      `Cookies: ${tokens.cookies(req, res)}`, // Log the cookies
     ].join(" | ");
   })
 );
