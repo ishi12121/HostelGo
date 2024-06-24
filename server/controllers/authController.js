@@ -1,8 +1,8 @@
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
-const User = require("../models/user"); // Corrected the file name to match the actual file name
+const User = require("../models/user");
 const Staff = require("../models/Staff");
-
+require("dotenv").config();
 exports.registerUser = async (req, res) => {
   try {
     const { email, password, role } = req.body;
@@ -56,17 +56,52 @@ exports.login = async (req, res) => {
       return res.status(400).send({ message: "Invalid password" });
     }
 
-    const token = jwt.sign(
+    const accessToken = jwt.sign(
       { email: user.email, role: user.role },
-      "secret_key",
-      {
-        expiresIn: "1h",
-      }
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: "15m" }
     );
 
-    res.cookie("token", token, { httpOnly: true });
-    res.status(200).send({ message: "Login successful" });
+    const refreshToken = jwt.sign(
+      { email: user.email, role: user.role },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.cookie("accessToken", accessToken, { httpOnly: true });
+    res.cookie("refreshToken", refreshToken, { httpOnly: true });
+    res.status(200).send({
+      message: "Login successful",
+      accessToken: accessToken,
+      refreshToken: refreshToken,
+    });
   } catch (error) {
     res.status(400).send({ message: error.message });
   }
+};
+
+exports.refreshToken = (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+
+  if (!refreshToken) {
+    return res.status(401).send({ message: "Refresh token not found" });
+  }
+
+  jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, user) => {
+    if (err) {
+      return res.status(403).send({ message: "Invalid refresh token" });
+    }
+
+    const accessToken = jwt.sign(
+      { email: user.email, role: user.role },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    res.cookie("accessToken", accessToken, { httpOnly: true });
+    res.status(200).send({
+      message: "Access token refreshed",
+      accessToken: accessToken,
+    });
+  });
 };
