@@ -10,13 +10,13 @@ const outpassDetailsSchema = new mongoose.Schema({
   timeFrom: String,
   timeTo: String,
   phNo: Number,
-  qrurl: String,
   parentPhNo: Number,
   reason: String,
   city: String,
   isAccept: Boolean,
   isWait: Boolean,
-  rejectReason: String
+  rejectReason: String,
+  staffId:String
 });
 
 module.exports = mongoose.model('OutpassDetails', outpassDetailsSchema);

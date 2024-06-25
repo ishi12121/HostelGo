@@ -1,42 +1,34 @@
 const jwt = require("jsonwebtoken");
 const opDetailsModel = require("../models/OutpassDetails");
 const checkreq = require("../models/ApprovalStatus");
+const { asyncHandler } = require("../handlers/errorHandlers");
 
-exports.createOpDetails = async (req, res) => {
-  try {
-    const { data } = req.body;
-    const decode = jwt.verify(req.cookies.siva, "1234");
+exports.createOpDetails = asyncHandler(async (req, res) => {
+  const { data } = req.body;
+  const opFormDetails = await opDetailsModel.create({
+    name: data.name,
+    department: data.department,
+    rollno: data.rollno,
+    year: data.year,
+    dateFrom: data.dateFrom,
+    dateTo: data.dateTo,
+    timeFrom: data.timeFrom,
+    timeTo: data.timeTo,
+    phNo: data.phNo,
+    parentPhNo: data.parentPhNo,
+    reason: data.reason,
+    city: data.city,
+    staffId: data.staffId,
+  });
 
-    const opFormDetails = await opDetailsModel.create({
-      name: data.name,
-      department: data.department,
-      rollno: data.rollno,
-      year: data.year,
-      dateFrom: data.dateFrom,
-      dateTo: data.dateTo,
-      timeFrom: data.timeFrom,
-      timeTo: data.timeTo,
-      phNo: data.phNo,
-      qrurl: data.qrurl,
-      parentPhNo: data.parentPhNo,
-      reason: data.reason,
-      city: data.city,
-    });
-
-    if (opFormDetails) {
-      try {
-        const val = await checkreq.create({ rollNo: decode.email });
-        if (val) {
-          return res.status(200).send({ data: opFormDetails, status: "no err" });
-        }
-      } catch (e) {
-        console.log(e);
-      }
-    }
-  } catch (err) {
-    console.log(err.message);
+  if (!opFormDetails) {
+    throw new Error("Failed to create opFormDetails");
   }
-};
+
+  return res.status(200).json({ data: opFormDetails, status: "success" });
+});
+
+
 
 exports.getOpDetails = async (req, res) => {
   try {
@@ -46,6 +38,7 @@ exports.getOpDetails = async (req, res) => {
     console.log(err.message);
   }
 };
+
 
 exports.getOpDetailsById = async (req, res) => {
   try {
