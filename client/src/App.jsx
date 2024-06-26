@@ -12,13 +12,16 @@ import Login from "./pages/Login";
 import ErrorPage from "./pages/ErrorPage";
 import { Container } from "@mui/material";
 import "./App.css";
+import { ApiProvider } from "./context/ApiContext";
 
 function App() {
   return (
     <AppProvider>
-      <Router>
-        <Main />
-      </Router>
+      <ApiProvider>
+        <Router>
+          <Main />
+        </Router>
+      </ApiProvider>
     </AppProvider>
   );
 }
