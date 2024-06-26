@@ -61,7 +61,6 @@ async function checkConnection() {
 checkConnection();
 
 app.use("/opDetails", require("./routes/opDetailsRoutes"));
-app.use("/checkReq", require("./routes/checkReqRoutes"));
 app.use("/auth", require("./routes/authRoutes"));
 
 // Start the server

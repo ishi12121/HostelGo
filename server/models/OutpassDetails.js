@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const outpassDetailsSchema = new mongoose.Schema({
   name: String,
@@ -14,9 +14,8 @@ const outpassDetailsSchema = new mongoose.Schema({
   reason: String,
   city: String,
   isAccept: Boolean,
-  isWait: Boolean,
   rejectReason: String,
-  staffId:String
+  staffId: String,
 });
 
-module.exports = mongoose.model('OutpassDetails', outpassDetailsSchema);
+module.exports = mongoose.model("OutpassDetails", outpassDetailsSchema);
