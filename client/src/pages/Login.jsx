@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import {
   TextField,
@@ -17,7 +17,9 @@ import * as yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import useToast from '../hooks/useToast';
 import Toast from '../components/Toast';
-
+import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { setTokens, getAccessToken } from '../utils/tokenManager';
 const schema = yup.object().shape({
   role: yup.string().required('Role is required'),
   email: yup.string().email('Invalid email').required('Email is required'),
@@ -84,6 +86,7 @@ const StyledButton = styled(Button)({
 });
 
 const LoginForm = () => {
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
@@ -93,7 +96,13 @@ const LoginForm = () => {
   });
 
   const { open, severity, message, showToast, hideToast } = useToast();
-
+  useEffect(() => {
+    // Check if there's an access token and redirect to home if it exists
+    const accessToken = getAccessToken();
+    if (accessToken) {
+      navigate('/');
+    }
+  }, [navigate]);
   const onSubmit = async (data) => {
     try {
       const url = 'http://localhost:3030/auth/login';
@@ -102,6 +111,8 @@ const LoginForm = () => {
         email: data.email,
         password: data.password,
       });
+      const { accessToken, refreshToken } = response.data;
+      setTokens(accessToken, refreshToken);
       showToast('success', response.data.message || 'Login successful!');
     } catch (error) {
       console.error('Error during login:', error);
@@ -163,7 +174,10 @@ const LoginForm = () => {
               Log In
             </StyledButton>
           </StyledForm>
-        </StyledPaper>
+          <Typography variant="body2" style={{ marginTop: '1rem' }}>
+          Don't have an account? <Link to="/register">Register here</Link>
+        </Typography>
+      </StyledPaper>
       </Container>
     </ThemeProvider>
   );

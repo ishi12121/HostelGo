@@ -3,6 +3,7 @@ import {
   Routes,
   Route,
   useLocation,
+  Navigate,
 } from "react-router-dom";
 import { AppProvider } from "./context/AppContext";
 import Home from "./pages/Home";
@@ -13,6 +14,7 @@ import ErrorPage from "./pages/ErrorPage";
 import { Container } from "@mui/material";
 import "./App.css";
 import { ApiProvider } from "./context/ApiContext";
+import Register from "./pages/Register";
 
 function App() {
   return (
@@ -31,13 +33,16 @@ function Main() {
 
   return (
     <>
-      {location.pathname !== "/login" && <Header />}
+      {location.pathname !== "/login" && location.pathname !== "/register" && (
+        <Header />
+      )}
       <Container>
         <Routes>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<Navigate to="/" replace />} />
           <Route path="/about" element={<About />} />
           <Route path="/login" element={<Login />} />
           <Route path="*" element={<ErrorPage />} />
+          <Route path="/register" element={<Register />} />
         </Routes>
       </Container>
     </>
