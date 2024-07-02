@@ -1,3 +1,4 @@
+import React from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -15,6 +16,9 @@ import { Container } from "@mui/material";
 import "./App.css";
 import { ApiProvider } from "./context/ApiContext";
 import Register from "./pages/Register";
+import ProtectedRoute from "./components/ProtectedRoute";
+import Student from "./pages/Student";
+import Staff from "./pages/Staff";
 
 function App() {
   return (
@@ -33,16 +37,23 @@ function Main() {
 
   return (
     <>
-      {location.pathname !== "/login" && location.pathname !== "/register" && (
-        <Header />
-      )}
+      {location.pathname !== "/login" &&
+        location.pathname !== "/register" &&
+        location.pathname !== "/student" &&
+        location.pathname !== "/staff" && <Header />}
       <Container>
         <Routes>
-          <Route path="/" element={<Navigate to="/" replace />} />
+          <Route path="/" element={<Home />} />
+          <Route path="/Student" element={<Student />} />
+          <Route path="/staff" element={<Staff />} />
           <Route path="/about" element={<About />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<ProtectedRoute />}>
+            <Route path="" element={<Login />} />
+          </Route>
+          <Route path="/register" element={<ProtectedRoute />}>
+            <Route path="" element={<Register />} />
+          </Route>
           <Route path="*" element={<ErrorPage />} />
-          <Route path="/register" element={<Register />} />
         </Routes>
       </Container>
     </>

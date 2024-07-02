@@ -1,42 +1,63 @@
-import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import React, { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import {
   TextField,
   Button,
   Container,
   Typography,
-  MenuItem,
   Box,
   Paper,
   ThemeProvider,
   createTheme,
-} from '@mui/material';
-import { styled, keyframes } from '@mui/system';
-import axios from 'axios';
-import * as yup from 'yup';
-import { yupResolver } from '@hookform/resolvers/yup';
-import useToast from '../hooks/useToast';
-import Toast from '../components/Toast';
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import { setTokens, getAccessToken } from '../utils/tokenManager';
+} from "@mui/material";
+import { styled, keyframes } from "@mui/system";
+import axios from "axios";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import useToast from "../hooks/useToast";
+import Toast from "../components/Toast";
+import { Link, useNavigate } from "react-router-dom";
+import { setTokens, getAccessToken } from "../utils/tokenManager";
+import SchoolIcon from "@mui/icons-material/School";
+import WorkIcon from "@mui/icons-material/Work";
+
+// Validation schema
 const schema = yup.object().shape({
-  role: yup.string().required('Role is required'),
-  email: yup.string().email('Invalid email').required('Email is required'),
-  password: yup.string().required('Password is required'),
+  role: yup.string().required("Role is required"),
+  email: yup.string().email("Invalid email").required("Email is required"),
+  password: yup.string().required("Password is required"),
 });
 
-const theme = createTheme({
+// Define themes for student and staff
+const studentTheme = createTheme({
   palette: {
     primary: {
-      main: '#3f51b5',
+      main: "#3f51b5",
     },
     secondary: {
-      main: '#f50057',
+      main: "#f50057",
+    },
+    background: {
+      default: "#f5f5f5",
     },
   },
 });
 
+const staffTheme = createTheme({
+  palette: {
+    primary: {
+      main: "#00695c",
+    },
+    secondary: {
+      main: "#d32f2f",
+    },
+    background: {
+      default: "#f5f5f5",
+    },
+  },
+});
+
+// Animations and styled components
 const fadeIn = keyframes`
   from {
     opacity: 0;
@@ -50,40 +71,61 @@ const fadeIn = keyframes`
 
 const StyledPaper = styled(Paper)(({ theme }) => ({
   padding: theme.spacing(4),
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-  borderRadius: '16px',
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  boxShadow: "0 8px 32px rgba(0, 0, 0, 0.1)",
+  borderRadius: "16px",
   animation: `${fadeIn} 0.5s ease-out`,
 }));
 
-const Background = styled(Box)({
-  position: 'fixed',
+const Background = styled(Box)(({ theme }) => ({
+  position: "fixed",
   top: 0,
   left: 0,
   right: 0,
   bottom: 0,
-  background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
+  background: theme.palette.background.default,
   zIndex: -1,
-});
+}));
 
-const StyledForm = styled('form')({
-  width: '100%',
-  marginTop: theme.spacing(3),
+const StyledForm = styled("form")({
+  width: "100%",
+  marginTop: 3,
 });
 
 const StyledButton = styled(Button)({
-  margin: theme.spacing(3, 0, 2),
-  borderRadius: '25px',
-  padding: '12px',
-  fontWeight: 'bold',
-  transition: 'all 0.3s ease',
-  '&:hover': {
-    transform: 'translateY(-3px)',
-    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+  margin: 3,
+  borderRadius: "25px",
+  padding: "12px",
+  fontWeight: "bold",
+  transition: "all 0.3s ease",
+  "&:hover": {
+    transform: "translateY(-3px)",
+    boxShadow: "0 4px 20px rgba(0, 0, 0, 0.2)",
   },
 });
+
+const RoleSelection = styled(Box)(({ theme }) => ({
+  display: "flex",
+  justifyContent: "space-around",
+  marginBottom: theme.spacing(2),
+  width: "100%",
+  "& > *": {
+    margin: theme.spacing(1),
+    padding: theme.spacing(1),
+    borderRadius: "8px",
+    border: `2px solid ${theme.palette.primary.main}`,
+    transition: "all 0.3s ease",
+    "&:hover": {
+      transform: "scale(1.05)",
+    },
+  },
+  "& .selected": {
+    backgroundColor: theme.palette.primary.main,
+    color: "#fff",
+  },
+}));
 
 const LoginForm = () => {
   const navigate = useNavigate();
@@ -91,63 +133,128 @@ const LoginForm = () => {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
+    watch,
   } = useForm({
     resolver: yupResolver(schema),
   });
 
   const { open, severity, message, showToast, hideToast } = useToast();
+  const role = watch("role");
+  const [selectedRole, setSelectedRole] = useState("");
+  const [response, setResponse] = useState(null);
   useEffect(() => {
-    // Check if there's an access token and redirect to home if it exists
-    const accessToken = getAccessToken();
-    if (accessToken) {
-      navigate('/');
+    if (response == true) {
+      const role = localStorage.getItem("role");
+      if (role === "student") {
+        navigate("/student");
+      } else if (role === "staff") {
+        navigate("/staff");
+      } else {
+        navigate("/");
+      }
     }
-  }, [navigate]);
+    if (response === false) {
+      navigate("/login");
+    }
+    setResponse(false);
+  }, [response]);
+
   const onSubmit = async (data) => {
     try {
-      const url = 'http://localhost:3030/auth/login';
+      const url = "http://localhost:3030/auth/login";
       const response = await axios.post(url, {
         role: data.role,
         email: data.email,
         password: data.password,
       });
-      const { accessToken, refreshToken } = response.data;
+      const { accessToken, refreshToken, role } = response.data;
+      localStorage.setItem("role", role);
       setTokens(accessToken, refreshToken);
-      showToast('success', response.data.message || 'Login successful!');
+      showToast("success", response.data.message || "Login successful!");
+      setResponse(true);
     } catch (error) {
-      console.error('Error during login:', error);
-      showToast('error', 'Login failed. Please try again.');
+      console.error("Error during login:", error);
+      showToast("error", "Login failed. Please try again.");
+      setResponse(false);
     }
   };
+
+  const handleRoleSelection = (role) => {
+    setValue("role", role);
+    setSelectedRole(role);
+  };
+
+  const theme = selectedRole === "student" ? studentTheme : staffTheme;
 
   return (
     <ThemeProvider theme={theme}>
       <Background />
-      <Toast open={open} severity={severity} message={message} onClose={hideToast} />
-      <Container component="main" maxWidth="xs" sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center' }}>
+      <Toast
+        open={open}
+        severity={severity}
+        message={message}
+        onClose={hideToast}
+      />
+      <Container
+        component="main"
+        maxWidth="xs"
+        sx={{ minHeight: "100vh", display: "flex", alignItems: "center" }}
+      >
         <StyledPaper elevation={6}>
-          <Typography component="h1" variant="h4" gutterBottom sx={{ fontWeight: 'bold', color: theme.palette.primary.main }}>
+          <Typography
+            component="h1"
+            variant="h4"
+            gutterBottom
+            sx={{ fontWeight: "bold", color: theme.palette.primary.main }}
+          >
             Welcome Back
           </Typography>
-          <Typography variant="subtitle1" gutterBottom sx={{ color: theme.palette.text.secondary }}>
+          <Typography
+            variant="subtitle1"
+            gutterBottom
+            sx={{ color: theme.palette.text.secondary }}
+          >
             Please log in to continue
           </Typography>
           <StyledForm onSubmit={handleSubmit(onSubmit)}>
+            <RoleSelection>
+              <Box
+                className={role === "student" ? "selected" : ""}
+                onClick={() => handleRoleSelection("student")}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  cursor: "pointer",
+                  padding: theme.spacing(2),
+                }}
+              >
+                <SchoolIcon fontSize="large" />
+                <Typography variant="h6">Student</Typography>
+              </Box>
+              <Box
+                className={role === "staff" ? "selected" : ""}
+                onClick={() => handleRoleSelection("staff")}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  cursor: "pointer",
+                  padding: theme.spacing(2),
+                }}
+              >
+                <WorkIcon fontSize="large" />
+                <Typography variant="h6">Warden</Typography>
+              </Box>
+            </RoleSelection>
+            {errors.role && (
+              <Typography color="error" variant="body2">
+                {errors.role.message}
+              </Typography>
+            )}
             <TextField
-              {...register('role')}
-              select
-              label="Role"
-              fullWidth
-              variant="outlined"
-              error={!!errors.role}
-              helperText={errors.role?.message}
-              margin="normal"
-            >
-              <MenuItem value="student">Student</MenuItem>
-              <MenuItem value="staff">Staff</MenuItem>
-            </TextField>
-            <TextField
-              {...register('email')}
+              {...register("email")}
               label="Email"
               fullWidth
               variant="outlined"
@@ -156,7 +263,7 @@ const LoginForm = () => {
               margin="normal"
             />
             <TextField
-              {...register('password')}
+              {...register("password")}
               label="Password"
               fullWidth
               type="password"
@@ -174,10 +281,10 @@ const LoginForm = () => {
               Log In
             </StyledButton>
           </StyledForm>
-          <Typography variant="body2" style={{ marginTop: '1rem' }}>
-          Don't have an account? <Link to="/register">Register here</Link>
-        </Typography>
-      </StyledPaper>
+          <Typography variant="body2" style={{ marginTop: "1rem" }}>
+            Don't have an account? <Link to="/register">Register here</Link>
+          </Typography>
+        </StyledPaper>
       </Container>
     </ThemeProvider>
   );

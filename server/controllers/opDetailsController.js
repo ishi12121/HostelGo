@@ -5,6 +5,7 @@ exports.createOpDetails = asyncHandler(async (req, res) => {
   try {
     const {
       name,
+      userId,
       department,
       rollno,
       year,
@@ -20,6 +21,7 @@ exports.createOpDetails = asyncHandler(async (req, res) => {
     const opFormDetails = await opDetailsModel.create({
       staffId: null,
       name,
+      userId,
       department,
       rollno,
       year,
@@ -50,6 +52,18 @@ exports.getOpDetails = asyncHandler(async (req, res) => {
     return res.status(405).send({ status: "error", error: err.message });
   }
 });
+
+exports.getOpDetailsByUserId = asyncHandler(async (req, res) => {
+  try {
+    const userId = req.params;
+    const data = await opDetailsModel.findOne(userId);
+    return res.status(200).send({ status: "success", data: data });
+  } catch (err) {
+    return res.status(405).send({ status: "error", error: err.message });
+  }
+}
+);
+
 
 exports.getOpDetailsByStaffId = asyncHandler(async (req, res) => {
   try {

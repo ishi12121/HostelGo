@@ -8,5 +8,6 @@ router.post("/assign", opDetailsController.AssigntoStaff);
 router.post("/accept", opDetailsController.acceptRequest);
 router.get("/StaffId", opDetailsController.getOpDetailsByStaffId);
 router.post("/reject", opDetailsController.rejectRequest);
+router.get("/userId", opDetailsController.getOpDetailsByUserId);
 
 module.exports = router;
