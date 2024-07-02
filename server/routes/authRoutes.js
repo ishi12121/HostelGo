@@ -1,42 +1,50 @@
 const express = require("express");
-const { body } = require("express-validator");
+const yup = require("yup");
 const router = express.Router();
 const authController = require("../controllers/authController");
 
+const validateRequest = (schema) => async (req, res, next) => {
+  try {
+    await schema.validate(req.body, { abortEarly: false });
+    next();
+  } catch (error) {
+    res
+      .status(400)
+      .json({
+        status: "error",
+        message: "Invalid field values",
+        errorMessage: error.errors,
+      });
+  }
+};
+
+const registerSchema = yup.object({
+  email: yup.string().email("Email is required").required(),
+  password: yup
+    .string()
+    .min(6, "Password must be at least 6 characters long")
+    .required(),
+  role: yup.string().required("Role is required"),
+});
+
+const loginSchema = yup.object({
+  email: yup.string().email("Email is required").required(),
+  password: yup.string().required("Password is required"),
+  role: yup.string().required("Role is required"),
+});
+
 router.post(
   "/register/user",
-  [
-    body("email").isEmail().withMessage("Email is required"),
-    body("password")
-      .isLength({ min: 6 })
-      .withMessage("Password must be at least 6 characters long"),
-    body("role").notEmpty().withMessage("Role is required"),
-  ],
+  validateRequest(registerSchema),
   authController.registerUser
 );
 
 router.post(
   "/register/staff",
-  [
-    body("email").isEmail().withMessage("Email is required"),
-    body("password")
-      .isLength({ min: 6 })
-      .withMessage("Password must be at least 6 characters long"),
-    body("role").notEmpty().withMessage("Role is required"),
-  ],
+  validateRequest(registerSchema),
   authController.registerStaff
 );
 
-router.post(
-  "/login",
-  [
-    body("email").isEmail().withMessage("Email is required"),
-    body("password").notEmpty().withMessage("Password is required"),
-    body("role").notEmpty().withMessage("Role is required"),
-  ],
-  authController.login
-);
-
-router.post("/refresh-token", authController.refreshToken);
+router.post("/login", validateRequest(loginSchema), authController.login);
 
 module.exports = router;

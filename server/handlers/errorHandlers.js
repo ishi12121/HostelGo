@@ -7,10 +7,10 @@ const errorHandler = (err, req, res, next) => {
     
     res.status(statusCode).json({
       status: 'error',
-      message: message
+      message: message,
+      error: err 
     });
-  };
-  
+    };
 
   const asyncHandler = (fn) => (req, res, next) =>
     Promise.resolve(fn(req, res, next)).catch(next);

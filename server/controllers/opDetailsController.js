@@ -1,73 +1,106 @@
-
 const opDetailsModel = require("../models/OutpassDetails");
 const { asyncHandler } = require("../handlers/errorHandlers");
 
 exports.createOpDetails = asyncHandler(async (req, res) => {
-  const { data } = req.body;
-  const opFormDetails = await opDetailsModel.create({
-    name: data.name,
-    department: data.department,
-    rollno: data.rollno,
-    year: data.year,
-    dateFrom: data.dateFrom,
-    dateTo: data.dateTo,
-    timeFrom: data.timeFrom,
-    timeTo: data.timeTo,
-    phNo: data.phNo,
-    parentPhNo: data.parentPhNo,
-    isAccept: false,
-    reason: data.reason,
-    city: data.city,
-    staffId: data.staffId,
-  });
-
-  if (!opFormDetails) {
-    throw new Error("Failed to create opFormDetails");
+  try {
+    const {
+      name,
+      department,
+      rollno,
+      year,
+      dateFrom,
+      dateTo,
+      timeFrom,
+      timeTo,
+      phNo,
+      parentPhNo,
+      reason,
+      city,
+    } = req.body;
+    const opFormDetails = await opDetailsModel.create({
+      staffId: null,
+      name,
+      department,
+      rollno,
+      year,
+      dateFrom,
+      dateTo,
+      timeFrom,
+      timeTo,
+      phNo,
+      parentPhNo,
+      isAccept: null,
+      reason,
+      city,
+    });
+    if (!opFormDetails) {
+      throw new Error("Failed to create opFormDetails");
+    }
+    return res.status(200).json({ data: opFormDetails, status: "success" });
+  } catch (error) {
+    return res.status(405).send({ status: "error", error: err.message });
   }
-
-  return res.status(200).json({ data: opFormDetails, status: "success" });
 });
 
-exports.getOpDetails = async (req, res) => {
+exports.getOpDetails = asyncHandler(async (req, res) => {
   try {
     const data = await opDetailsModel.find();
     return res.status(200).send({ data: data });
   } catch (err) {
-    console.log(err.message);
+    return res.status(405).send({ status: "error", error: err.message });
   }
-};
+});
 
-
-
-exports.acceptRequest = asyncHandler(async (req, res) => {
+exports.getOpDetailsByStaffId = asyncHandler(async (req, res) => {
   try {
-    const { rollno } = req.body;
-    const data = await opDetailsModel.findOneAndUpdate(
-      { rollno: rollno },
-      { isAccept: true },
-      { new: true } // This option returns the updated document
-    );
-    return res.status(200).send({ data: data });
+    const staffId = req.params;
+    const data = await opDetailsModel.findOne(staffId);
+    return res.status(200).send({ status: "success", data: data });
   } catch (err) {
-    console.log(err.message);
-    return res.status(500).send({ error: 'An error occurred while processing the request' });
+    return res.status(405).send({ status: "error", error: err.message });
   }
 });
 
 
 
-exports.rejectRequest = async (req, res) => {
+exports.AssigntoStaff = asyncHandler(async (req, res) => {
   try {
-    const { rollno, val } = req.body;
+    const { id, staffId } = req.body;
     const data = await opDetailsModel.findOneAndUpdate(
-      { rollno: rollno },
-      {isAccept:false},
-      { rejectReason: val },
-      { new: true } 
+      { _id: id },
+      { staffId: staffId },
+      { new: true }
     );
-    return res.status(200).send({ data: data });
+    return res.status(200).send({ status: "success", data: data });
   } catch (err) {
-    console.log(err.message);
+    return res.status(405).send({ status: "error", error: err.message });
   }
-};
+});
 
+exports.acceptRequest = asyncHandler(async (req, res) => {
+  try {
+    const { id } = req.body;
+    const data = await opDetailsModel.findOneAndUpdate(
+      { _id: id },
+      { isAccept: true },
+      { new: true }
+    );
+    return res.status(200).send({ status: "success", data: data });
+  } catch (err) {
+    return res.status(405).send({ status: "error", error: err.message });
+  }
+});
+
+exports.rejectRequest = asyncHandler(async (req, res) => {
+  try {
+    const { id } = req.body;
+    const data = await opDetailsModel.findOneAndUpdate(
+      { _id: id },
+      { isAccept: false },
+      { new: true }
+    );
+    return res.status(200).send({ status: "success", data: data });
+  } catch (err) {
+    return res.status(405).send({ status: "error", error: err.message });
+  }
+});

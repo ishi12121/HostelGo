@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 
 const outpassDetailsSchema = new mongoose.Schema({
+  staffId: String,
   name: String,
   department: String,
   rollno: String,
@@ -15,7 +16,7 @@ const outpassDetailsSchema = new mongoose.Schema({
   city: String,
   isAccept: Boolean,
   rejectReason: String,
-  staffId: String,
+  
 });
 
 module.exports = mongoose.model("OutpassDetails", outpassDetailsSchema);
