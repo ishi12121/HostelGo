@@ -4,12 +4,9 @@ import {
   Routes,
   Route,
   useLocation,
-  Navigate,
 } from "react-router-dom";
 import { AppProvider } from "./context/AppContext";
-import Home from "./pages/Home";
 import About from "./pages/About";
-import Header from "./components/Header";
 import Login from "./pages/Login";
 import ErrorPage from "./pages/ErrorPage";
 import { Container } from "@mui/material";
@@ -33,17 +30,10 @@ function App() {
 }
 
 function Main() {
-  const location = useLocation();
-
   return (
     <>
-      {location.pathname !== "/login" &&
-        location.pathname !== "/register" &&
-        location.pathname !== "/student" &&
-        location.pathname !== "/staff" && <Header />}
       <Container>
         <Routes>
-          <Route path="/" element={<Home />} />
           <Route path="/Student" element={<Student />} />
           <Route path="/staff" element={<Staff />} />
           <Route path="/about" element={<About />} />
