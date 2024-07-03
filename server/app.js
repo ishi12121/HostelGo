@@ -1,16 +1,19 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const mongoose = require("mongoose");
-const bodyparser = require("body-parser");
-const cookieparser = require("cookie-parser");
-const morgan = require("morgan");
+import dotenv from 'dotenv';
+import express from 'express';
+import cors from 'cors';
+import mongoose from 'mongoose';
+import bodyParser from 'body-parser';
+import cookieParser from 'cookie-parser';
+import morgan from 'morgan';
+
+// Load environment variables from .env file
+dotenv.config();
 
 const app = express();
-app.use(bodyparser.json());
-app.use(bodyparser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(cookieparser());
+app.use(cookieParser());
 
 const corsOptions = {
   origin: process.env.CORS_URL,
@@ -19,12 +22,12 @@ const corsOptions = {
 app.use(cors(corsOptions));
 
 // Custom token to log request body
-morgan.token("body", (req) => {
+morgan.token('body', (req) => {
   return JSON.stringify(req.body);
 });
 
 // Custom token to log cookies
-morgan.token("cookies", (req) => {
+morgan.token('cookies', (req) => {
   return JSON.stringify(req.cookies);
 });
 
@@ -35,14 +38,14 @@ app.use(
       `Method: ${tokens.method(req, res)}`,
       `URL: ${tokens.url(req, res)}`,
       `Status: ${tokens.status(req, res)}`,
-      `Content-Length: ${tokens.res(req, res, "content-length")}`,
-      `- Response Time: ${tokens["response-time"](req, res)} ms`,
-      `IP: ${tokens["remote-addr"](req, res)}`,
-      `User-Agent: ${tokens["user-agent"](req, res)}`,
+      `Content-Length: ${tokens.res(req, res, 'content-length')}`,
+      `- Response Time: ${tokens['response-time'](req, res)} ms`,
+      `IP: ${tokens['remote-addr'](req, res)}`,
+      `User-Agent: ${tokens['user-agent'](req, res)}`,
       `Timestamp: ${new Date().toISOString()}`,
       `Payload: ${tokens.body(req, res)}`, // Log the request body
       `Cookies: ${tokens.cookies(req, res)}`, // Log the cookies
-    ].join(" | ");
+    ].join(' | ');
   })
 );
 
@@ -52,16 +55,21 @@ async function checkConnection() {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    console.log("Connected");
+    console.log('Connected to MongoDB');
   } catch (error) {
-    console.log("Not Connected :", error.message);
+    console.log('Error connecting to MongoDB:', error.message);
   }
 }
 
 checkConnection();
 
-app.use("/opDetails", require("./routes/opDetailsRoutes"));
-app.use("/auth", require("./routes/authRoutes"));
+// Import routes
+import opDetailsRoutes from './routes/opDetailsRoutes.js';
+import authRoutes from './routes/authRoutes.js';
+
+// Use routes
+app.use('/opDetails', opDetailsRoutes);
+app.use('/auth', authRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 3030;

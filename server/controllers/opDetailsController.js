@@ -1,115 +1,123 @@
-const opDetailsModel = require("../models/OutpassDetails");
-const { asyncHandler } = require("../handlers/errorHandlers");
+import opDetailsModel from '../models/OutpassDetails.js';
+import { asyncHandler } from '../handlers/errorHandlers.js';
 
-exports.createOpDetails = asyncHandler(async (req, res) => {
-  try {
-    const {
-      name,
-      userId,
-      department,
-      rollno,
-      year,
-      dateFrom,
-      dateTo,
-      timeFrom,
-      timeTo,
-      phNo,
-      parentPhNo,
-      reason,
-      city,
-    } = req.body;
-    const opFormDetails = await opDetailsModel.create({
-      staffId: null,
-      name,
-      userId,
-      department,
-      rollno,
-      year,
-      dateFrom,
-      dateTo,
-      timeFrom,
-      timeTo,
-      phNo,
-      parentPhNo,
-      isAccept: null,
-      reason,
-      city,
-    });
-    if (!opFormDetails) {
-      throw new Error("Failed to create opFormDetails");
-    }
-    return res.status(200).json({ data: opFormDetails, status: "success" });
-  } catch (error) {
-    return res.status(405).send({ status: "error", error: err.message });
+// Create a new outpass detail
+export const createOpDetails = asyncHandler(async (req, res) => {
+  const {
+    name,
+    userId,
+    department,
+    rollno,
+    year,
+    dateFrom,
+    dateTo,
+    timeFrom,
+    timeTo,
+    phNo,
+    parentPhNo,
+    reason,
+    city,
+  } = req.body;
+
+  const opFormDetails = await opDetailsModel.create({
+    staffId: null,
+    name,
+    userId,
+    department,
+    rollno,
+    year,
+    dateFrom,
+    dateTo,
+    timeFrom,
+    timeTo,
+    phNo,
+    parentPhNo,
+    isAccept: null,
+    reason,
+    city,
+  });
+
+  if (!opFormDetails) {
+    throw new Error('Failed to create opFormDetails');
   }
+
+  res.status(200).json({ data: opFormDetails, status: 'success' });
 });
 
-exports.getOpDetails = asyncHandler(async (req, res) => {
-  try {
-    const data = await opDetailsModel.find();
-    return res.status(200).send({ data: data });
-  } catch (err) {
-    return res.status(405).send({ status: "error", error: err.message });
-  }
+// Get all outpass details
+export const getOpDetails = asyncHandler(async (req, res) => {
+  const data = await opDetailsModel.find();
+  res.status(200).json({ data });
 });
 
-exports.getOpDetailsByUserId = asyncHandler(async (req, res) => {
-  try {
-    const {userId} = req.params;
-    const data = await opDetailsModel.find({userId:userId});
-    return res.status(200).send({ status: "success", data: data });
-  } catch (err) {
-    return res.status(405).send({ status: "error", error: err.message });
+// Get outpass details by user ID
+export const getOpDetailsByUserId = asyncHandler(async (req, res) => {
+  const { userId } = req.params;
+  const data = await opDetailsModel.find({ userId });
+
+  if (data.length === 0) {
+    return res.status(404).json({ status: 'error', message: 'No details found for this user ID' });
   }
+
+  res.status(200).json({ status: 'success', data });
 });
 
-exports.getOpDetailsByStaffId = asyncHandler(async (req, res) => {
-  try {
-    const { staffId } = req.params;
-    const data = await opDetailsModel.find({ staffId: staffId });
-    return res.status(200).send({ status: "success", data: data });
-  } catch (err) {
-    return res.status(500).send({ status: "error", error: err.message });
+// Get outpass details by staff ID
+export const getOpDetailsByStaffId = asyncHandler(async (req, res) => {
+  const { staffId } = req.params;
+  const data = await opDetailsModel.find({ staffId });
+
+  if (data.length === 0) {
+    return res.status(404).json({ status: 'error', message: 'No details found for this staff ID' });
   }
-});
-exports.AssigntoStaff = asyncHandler(async (req, res) => {
-  try {
-    const { id, staffId } = req.body;
-    const data = await opDetailsModel.findOneAndUpdate(
-      { _id: id },
-      { staffId: staffId },
-      { new: true }
-    );
-    return res.status(200).send({ status: "success", data: data });
-  } catch (err) {
-    return res.status(405).send({ status: "error", error: err.message });
-  }
+
+  res.status(200).json({ status: 'success', data });
 });
 
-exports.acceptRequest = asyncHandler(async (req, res) => {
-  try {
-    const { id } = req.body;
-    const data = await opDetailsModel.findOneAndUpdate(
-      { _id: id },
-      { isAccept: true },
-      { new: true }
-    );
-    return res.status(200).send({ status: "success", data: data });
-  } catch (err) {
-    return res.status(405).send({ status: "error", error: err.message });
+// Assign outpass details to staff
+export const AssigntoStaff = asyncHandler(async (req, res) => {
+  const { id, staffId } = req.body;
+  const data = await opDetailsModel.findOneAndUpdate(
+    { _id: id },
+    { staffId },
+    { new: true }
+  );
+
+  if (!data) {
+    return res.status(404).json({ status: 'error', message: 'Outpass details not found' });
   }
+
+  res.status(200).json({ status: 'success', data });
 });
 
-exports.rejectRequest = asyncHandler(async (req, res) => {
-  try {
-    const { id } = req.body;
-    const data = await opDetailsModel.findOneAndUpdate(
-      { _id: id },
-      { isAccept: false },
-      { new: true }
-    );
-    return res.status(200).send({ status: "success", data: data });
-  } catch (err) {
-    return res.status(405).send({ status: "error", error: err.message });
+// Accept outpass request
+export const acceptRequest = asyncHandler(async (req, res) => {
+  const { id } = req.body;
+  const data = await opDetailsModel.findOneAndUpdate(
+    { _id: id },
+    { isAccept: true },
+    { new: true }
+  );
+
+  if (!data) {
+    return res.status(404).json({ status: 'error', message: 'Outpass details not found' });
   }
+
+  res.status(200).json({ status: 'success', data });
+});
+
+// Reject outpass request
+export const rejectRequest = asyncHandler(async (req, res) => {
+  const { id } = req.body;
+  const data = await opDetailsModel.findOneAndUpdate(
+    { _id: id },
+    { isAccept: false },
+    { new: true }
+  );
+
+  if (!data) {
+    return res.status(404).json({ status: 'error', message: 'Outpass details not found' });
+  }
+
+  res.status(200).json({ status: 'success', data });
 });

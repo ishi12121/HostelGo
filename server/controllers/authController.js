@@ -1,96 +1,79 @@
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcrypt");
-const User = require("../models/user");
-const Staff = require("../models/Staff");
-const { asyncHandler } = require("../handlers/errorHandlers");
-require("dotenv").config();
-exports.registerUser = asyncHandler(async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
+import User from '../models/User.js';
+import Staff from '../models/Staff.js';
+import { asyncHandler } from '../handlers/errorHandlers.js';
+import dotenv from 'dotenv';
 
-    const newUser = new User({
-      email,
-      password: hashedPassword,
-      role: "student",
-    });
 
-    await newUser.save();
-    res
-      .status(201)
-      .send({ status: "success", message: "User registered successfully" });
-  } catch (error) {
-    res.status(400).send({ status: "error", message: error.message });
-  }
+
+export const registerUser = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const newUser = new User({
+    email,
+    password: hashedPassword,
+    role: 'student',
+  });
+
+  await newUser.save();
+  res.status(201).json({ status: 'success', message: 'User registered successfully' });
 });
 
-exports.registerStaff = asyncHandler(async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const hashedPassword = await bcrypt.hash(password, 10);
+export const registerStaff = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+  const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newStaff = new Staff({
-      email,
-      password: hashedPassword,
-      role: "staff",
-    });
+  const newStaff = new Staff({
+    email,
+    password: hashedPassword,
+    role: 'staff',
+  });
 
-    await newStaff.save();
-    res
-      .status(201)
-      .send({ status: "success", message: "Staff registered successfully" });
-  } catch (error) {
-    res.status(400).send({ status: "error", message: error.message });
-  }
+  await newStaff.save();
+  res.status(201).json({ status: 'success', message: 'Staff registered successfully' });
 });
 
-exports.login = asyncHandler(async (req, res) => {
-  try {
-    const { email, password, role } = req.body;
+export const login = asyncHandler(async (req, res) => {
+  const { email, password, role } = req.body;
 
-    const model = role === "staff" ? Staff : User;
-    const user = await model.findOne({ email });
-    if (!user) {
-      return res.status(400).send({ message: "User not found" });
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-
-    if (!isPasswordValid) {
-      return res.status(400).send({ message: "Invalid password" });
-    }
-
-    const accessToken = jwt.sign(
-      { email: user.email, role: user.role },
-      process.env.ACCESS_TOKEN_SECRET,
-      { expiresIn: "120m" }
-    );
-
-    const refreshToken = jwt.sign(
-      { email: user.email, role: user.role },
-      process.env.REFRESH_TOKEN_SECRET,
-      { expiresIn: "7d" }
-    );
-
-    res.cookie("accessToken", accessToken, { httpOnly: true });
-    res.cookie("refreshToken", refreshToken, { httpOnly: true });
-    res.status(200).send({
-      status: "success",
-      message: "Login successful",
-      userId: user?._id,
-      role: user?.role,
-      accessToken: accessToken,
-      refreshToken: refreshToken,
-    });
-  } catch (error) {
-    res.status(400).send({ status: "error", message: error.message });
+  const model = role === 'staff' ? Staff : User;
+  const user = await model.findOne({ email });
+  if (!user) {
+    return res.status(400).json({ status: 'error', message: 'User not found' });
   }
+
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    return res.status(400).json({ status: 'error', message: 'Invalid password' });
+  }
+
+  const accessToken = jwt.sign(
+    { email: user.email, role: user.role },
+    process.env.ACCESS_TOKEN_SECRET,
+    { expiresIn: '120m' }
+  );
+
+  const refreshToken = jwt.sign(
+    { email: user.email, role: user.role },
+    process.env.REFRESH_TOKEN_SECRET,
+    { expiresIn: '7d' }
+  );
+
+  res.cookie('accessToken', accessToken, { httpOnly: true });
+  res.cookie('refreshToken', refreshToken, { httpOnly: true });
+  res.status(200).json({
+    status: 'success',
+    message: 'Login successful',
+    userId: user._id,
+    role: user.role,
+    accessToken,
+    refreshToken,
+  });
 });
-exports.GetAllStaff = asyncHandler(async (req, res) => {
-  try {
-    const staff = await Staff.find();
-    return res.status(200).send({ status: "success", data: staff });
-  } catch (err) {
-    return res.status(405).send({ status: "error", error: err.message });
-  }
+
+export const GetAllStaff = asyncHandler(async (req, res) => {
+  const staff = await Staff.find();
+  res.status(200).json({ status: 'success', data: staff });
 });
