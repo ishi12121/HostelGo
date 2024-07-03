@@ -18,11 +18,21 @@ import {
   Chip,
   ThemeProvider,
   createTheme,
+  Avatar,
+  Divider,
 } from "@mui/material";
+import { styled } from "@mui/system";
 import LogoutIcon from "@mui/icons-material/Logout";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
 import PendingIcon from "@mui/icons-material/Pending";
+import {
+  Event as EventIcon,
+  Schedule as ScheduleIcon,
+  LocationCity as LocationCityIcon,
+  Description as DescriptionIcon,
+  Person as PersonIcon,
+} from "@mui/icons-material";
 
 const theme = createTheme({
   palette: {
@@ -34,10 +44,25 @@ const theme = createTheme({
     },
     background: {
       default: "#e8f5e9",
-      paper: "#c8e6c9",
+      paper: "#ffffff",
     },
   },
 });
+
+const StyledCard = styled(Card)(({ theme }) => ({
+  height: "100%",
+  display: "flex",
+  flexDirection: "column",
+  transition: "transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out",
+  "&:hover": {
+    transform: "translateY(-5px)",
+    boxShadow: theme.shadows[8],
+  },
+}));
+
+const StyledChip = styled(Chip)(({ theme, color }) => ({
+  fontWeight: "bold",
+}));
 
 const Staff = () => {
   const navigate = useNavigate();
@@ -57,7 +82,7 @@ const Staff = () => {
   const fetchOpDetails = () => {
     axios
       .get(
-        `http://localhost:3030/opDetails/staffId?staffId=${localStorage.getItem(
+        `http://localhost:3030/opDetails/staff/${localStorage.getItem(
           "userId"
         )}`
       )
@@ -84,6 +109,7 @@ const Staff = () => {
     setIsRejectModalOpen(false);
     setSelectedRequest(null);
   };
+
   const handleAccept = () => {
     axios
       .post("http://localhost:3030/opDetails/accept", {
@@ -139,43 +165,48 @@ const Staff = () => {
         <Grid container spacing={3}>
           {opDetails.map((detail) => (
             <Grid item xs={12} sm={6} md={4} key={detail.id}>
-              <Card>
+              <StyledCard>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Request ID: {detail.id}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    gutterBottom
+                  <Box display="flex" alignItems="center" mb={2}>
+                    <Avatar sx={{ bgcolor: theme.palette.primary.main, mr: 2 }}>
+                      {detail.name.charAt(0)}
+                    </Avatar>
+                    <Box>
+                      <Typography variant="h6" gutterBottom>
+                        {detail.name}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Request ID: {detail.id}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Divider sx={{ my: 2 }} />
+
+                  <Box display="flex" alignItems="center" mb={1}>
+                    <EventIcon color="action" sx={{ mr: 1 }} />
+                    <Typography variant="body2">
+                      From: {new Date(detail.dateFrom).toLocaleDateString()}
+                    </Typography>
+                  </Box>
+                  <Box display="flex" alignItems="center" mb={1}>
+                    <ScheduleIcon color="action" sx={{ mr: 1 }} />
+                    <Typography variant="body2">
+                      {detail.timeFrom} - {detail.timeTo}
+                    </Typography>
+                  </Box>
+                  <Box display="flex" alignItems="flex-start" mb={1}>
+                    <DescriptionIcon color="action" sx={{ mr: 1, mt: 0.5 }} />
+                    <Typography variant="body2">{detail.reason}</Typography>
+                  </Box>
+
+                  <Box
+                    mt={2}
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
                   >
-                    Student: {detail.name}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    gutterBottom
-                  >
-                    From: {new Date(detail.dateFrom).toLocaleDateString()}{" "}
-                    {detail.timeFrom}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    gutterBottom
-                  >
-                    To: {new Date(detail.dateTo).toLocaleDateString()}{" "}
-                    {detail.timeTo}
-                  </Typography>
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    gutterBottom
-                  >
-                    Reason: {detail.reason}
-                  </Typography>
-                  <Box mt={2}>
-                    <Chip
+                    <StyledChip
                       icon={
                         detail.isAccept === true ? (
                           <CheckCircleIcon />
@@ -202,9 +233,10 @@ const Staff = () => {
                     />
                   </Box>
                 </CardContent>
-                <CardActions>
+                <CardActions sx={{ justifyContent: "flex-end" }}>
                   <Button
                     size="small"
+                    variant="contained"
                     color="primary"
                     onClick={() => handleOpenAcceptModal(detail)}
                     disabled={detail.isAccept !== null}
@@ -213,6 +245,7 @@ const Staff = () => {
                   </Button>
                   <Button
                     size="small"
+                    variant="contained"
                     color="secondary"
                     onClick={() => handleOpenRejectModal(detail)}
                     disabled={detail.isAccept !== null}
@@ -220,7 +253,7 @@ const Staff = () => {
                     Reject
                   </Button>
                 </CardActions>
-              </Card>
+              </StyledCard>
             </Grid>
           ))}
         </Grid>
@@ -270,7 +303,7 @@ const modalStyle = {
   transform: "translate(-50%, -50%)",
   width: 400,
   bgcolor: "background.paper",
-  border: "2px solid #000",
+  borderRadius: 2,
   boxShadow: 24,
   p: 4,
 };

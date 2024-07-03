@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
+  Navigate,
+  useNavigate,
   useLocation,
 } from "react-router-dom";
 import { AppProvider } from "./context/AppContext";
@@ -30,19 +32,32 @@ function App() {
 }
 
 function Main() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const role = localStorage.getItem('role');
+
+  useEffect(() => {
+    // Redirect based on role when accessing the root path
+    if (location.pathname === '/') {
+      if (role === 'student') {
+        navigate('/student');
+      } else if (role === 'staff') {
+        navigate('/staff');
+      } else {
+        navigate('/login');
+      }
+    }
+  }, [location.pathname, navigate, role]);
+
   return (
     <>
       <Container>
         <Routes>
-          <Route path="/Student" element={<Student />} />
-          <Route path="/staff" element={<Staff />} />
+          <Route path="/student" element={role === 'student' ? <Student /> : <Navigate to="/login" />} />
+          <Route path="/staff" element={role === 'staff' ? <Staff /> : <Navigate to="/login" />} />
           <Route path="/about" element={<About />} />
-          <Route path="/login" element={<ProtectedRoute />}>
-            <Route path="" element={<Login />} />
-          </Route>
-          <Route path="/register" element={<ProtectedRoute />}>
-            <Route path="" element={<Register />} />
-          </Route>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
           <Route path="*" element={<ErrorPage />} />
         </Routes>
       </Container>
