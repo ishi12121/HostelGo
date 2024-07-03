@@ -19,22 +19,22 @@ import {
   ThemeProvider,
   createTheme,
 } from "@mui/material";
-import LogoutIcon from '@mui/icons-material/Logout';
-import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import CancelIcon from '@mui/icons-material/Cancel';
-import PendingIcon from '@mui/icons-material/Pending';
+import LogoutIcon from "@mui/icons-material/Logout";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import CancelIcon from "@mui/icons-material/Cancel";
+import PendingIcon from "@mui/icons-material/Pending";
 
 const theme = createTheme({
   palette: {
     primary: {
-      main: '#1b5e20',
+      main: "#1b5e20",
     },
     secondary: {
-      main: '#b71c1c',
+      main: "#b71c1c",
     },
     background: {
-      default: '#e8f5e9',
-      paper: '#c8e6c9',
+      default: "#e8f5e9",
+      paper: "#c8e6c9",
     },
   },
 });
@@ -56,7 +56,11 @@ const Staff = () => {
 
   const fetchOpDetails = () => {
     axios
-      .get(`http://localhost:3030/opDetails/staffId?staffId=${localStorage.getItem("userId")}`)
+      .get(
+        `http://localhost:3030/opDetails/staffId?staffId=${localStorage.getItem(
+          "userId"
+        )}`
+      )
       .then((response) => {
         setOpDetails(response.data?.data || []);
       })
@@ -82,7 +86,9 @@ const Staff = () => {
   };
   const handleAccept = () => {
     axios
-      .post("http://localhost:3030/opDetails/accept", { id: selectedRequest._id })
+      .post("http://localhost:3030/opDetails/accept", {
+        id: selectedRequest._id,
+      })
       .then(() => {
         fetchOpDetails();
         handleCloseModal();
@@ -94,7 +100,9 @@ const Staff = () => {
 
   const handleReject = () => {
     axios
-      .post("http://localhost:3030/opDetails/reject", { id: selectedRequest._id })
+      .post("http://localhost:3030/opDetails/reject", {
+        id: selectedRequest._id,
+      })
       .then(() => {
         fetchOpDetails();
         handleCloseModal();
@@ -110,7 +118,7 @@ const Staff = () => {
         <AppBar position="static">
           <Toolbar>
             <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-              Staff Dashboard
+              Warden Dashboard
             </Typography>
             <IconButton
               color="inherit"
@@ -136,31 +144,60 @@ const Staff = () => {
                   <Typography variant="h6" gutterBottom>
                     Request ID: {detail.id}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    gutterBottom
+                  >
                     Student: {detail.name}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    From: {new Date(detail.dateFrom).toLocaleDateString()} {detail.timeFrom}
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    gutterBottom
+                  >
+                    From: {new Date(detail.dateFrom).toLocaleDateString()}{" "}
+                    {detail.timeFrom}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    To: {new Date(detail.dateTo).toLocaleDateString()} {detail.timeTo}
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    gutterBottom
+                  >
+                    To: {new Date(detail.dateTo).toLocaleDateString()}{" "}
+                    {detail.timeTo}
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    gutterBottom
+                  >
                     Reason: {detail.reason}
                   </Typography>
                   <Box mt={2}>
                     <Chip
                       icon={
-                        detail.isAccept === true ? <CheckCircleIcon /> :
-                        detail.isAccept === false ? <CancelIcon /> : <PendingIcon />
+                        detail.isAccept === true ? (
+                          <CheckCircleIcon />
+                        ) : detail.isAccept === false ? (
+                          <CancelIcon />
+                        ) : (
+                          <PendingIcon />
+                        )
                       }
                       label={
-                        detail.isAccept === true ? "Accepted" :
-                        detail.isAccept === false ? "Rejected" : "Pending"
+                        detail.isAccept === true
+                          ? "Accepted"
+                          : detail.isAccept === false
+                          ? "Rejected"
+                          : "Pending"
                       }
                       color={
-                        detail.isAccept === true ? "success" :
-                        detail.isAccept === false ? "error" : "warning"
+                        detail.isAccept === true
+                          ? "success"
+                          : detail.isAccept === false
+                          ? "error"
+                          : "warning"
                       }
                     />
                   </Box>
@@ -191,7 +228,9 @@ const Staff = () => {
 
       <Modal open={isAcceptModalOpen} onClose={handleCloseModal}>
         <Box sx={modalStyle}>
-          <Typography variant="h6" gutterBottom>Confirm Accept</Typography>
+          <Typography variant="h6" gutterBottom>
+            Confirm Accept
+          </Typography>
           <Typography>Are you sure you want to accept this request?</Typography>
           <Button
             onClick={handleAccept}
@@ -206,7 +245,9 @@ const Staff = () => {
 
       <Modal open={isRejectModalOpen} onClose={handleCloseModal}>
         <Box sx={modalStyle}>
-          <Typography variant="h6" gutterBottom>Confirm Reject</Typography>
+          <Typography variant="h6" gutterBottom>
+            Confirm Reject
+          </Typography>
           <Typography>Are you sure you want to reject this request?</Typography>
           <Button
             onClick={handleReject}
