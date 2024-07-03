@@ -24,7 +24,6 @@ const registerSchema = yup.object({
     .string()
     .min(6, "Password must be at least 6 characters long")
     .required(),
-  role: yup.string().required("Role is required"),
 });
 
 const loginSchema = yup.object({
@@ -46,5 +45,5 @@ router.post(
 );
 
 router.post("/login", validateRequest(loginSchema), authController.login);
-
+router.get("/getStaff",authController.GetAllStaff)
 module.exports = router;

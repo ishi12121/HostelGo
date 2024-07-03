@@ -56,26 +56,22 @@ exports.getOpDetails = asyncHandler(async (req, res) => {
 exports.getOpDetailsByUserId = asyncHandler(async (req, res) => {
   try {
     const userId = req.params;
-    const data = await opDetailsModel.findOne(userId);
-    return res.status(200).send({ status: "success", data: data });
-  } catch (err) {
-    return res.status(405).send({ status: "error", error: err.message });
-  }
-}
-);
-
-
-exports.getOpDetailsByStaffId = asyncHandler(async (req, res) => {
-  try {
-    const staffId = req.params;
-    const data = await opDetailsModel.findOne(staffId);
+    const data = await opDetailsModel.find(userId);
     return res.status(200).send({ status: "success", data: data });
   } catch (err) {
     return res.status(405).send({ status: "error", error: err.message });
   }
 });
 
-
+exports.getOpDetailsByStaffId = asyncHandler(async (req, res) => {
+  try {
+    const staffId = req.params;
+    const data = await opDetailsModel.find(staffId);
+    return res.status(200).send({ status: "success", data: data });
+  } catch (err) {
+    return res.status(405).send({ status: "error", error: err.message });
+  }
+});
 
 exports.AssigntoStaff = asyncHandler(async (req, res) => {
   try {

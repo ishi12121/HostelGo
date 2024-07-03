@@ -168,8 +168,9 @@ const LoginForm = () => {
         email: data.email,
         password: data.password,
       });
-      const { accessToken, refreshToken, role } = response.data;
+      const { accessToken, refreshToken, role, userId } = response.data;
       localStorage.setItem("role", role);
+      localStorage.setItem("userId", userId);
       setTokens(accessToken, refreshToken);
       showToast("success", response.data.message || "Login successful!");
       setResponse(true);

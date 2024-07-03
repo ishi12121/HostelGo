@@ -77,11 +77,20 @@ exports.login = asyncHandler(async (req, res) => {
     res.status(200).send({
       status: "success",
       message: "Login successful",
-      role:user?.role,
+      userId: user?._id,
+      role: user?.role,
       accessToken: accessToken,
       refreshToken: refreshToken,
     });
   } catch (error) {
     res.status(400).send({ status: "error", message: error.message });
+  }
+});
+exports.GetAllStaff = asyncHandler(async (req, res) => {
+  try {
+    const staff = await Staff.find();
+    return res.status(200).send({ status: "success", data: staff });
+  } catch (err) {
+    return res.status(405).send({ status: "error", error: err.message });
   }
 });
