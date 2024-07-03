@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
-import { getAccessToken, getRefreshToken } from '../utils/tokenManager'; // Adjust the path to match your project structure
+import { getAccessToken, getRefreshToken } from '../utils/tokenManager';
 
 const ProtectedRoute = () => {
   const accessToken = getAccessToken();

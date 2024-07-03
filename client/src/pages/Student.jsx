@@ -21,6 +21,8 @@ import {
   AppBar,
   Toolbar,
   IconButton,
+  Divider,
+  Avatar,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import axios from "axios";
@@ -34,6 +36,12 @@ import * as yup from "yup";
 import LogoutIcon from "@mui/icons-material/Logout";
 import AddIcon from "@mui/icons-material/Add";
 import PersonIcon from "@mui/icons-material/Person";
+import {
+  Event as EventIcon,
+  Schedule as ScheduleIcon,
+  LocationCity as LocationCityIcon,
+  Description as DescriptionIcon,
+} from "@mui/icons-material";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
@@ -61,17 +69,6 @@ const theme = createTheme({
   },
 });
 
-// const fadeIn = keyframes`
-//   from {
-//     opacity: 0;
-//     transform: translateY(-20px);
-//   }
-//   to {
-//     opacity: 1;
-//     transform: translateY(0);
-//   }
-// `;
-
 const StyledCard = styled(Card)(({ theme }) => ({
   height: "100%",
   display: "flex",
@@ -81,6 +78,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
     transform: "translateY(-5px)",
     boxShadow: theme.shadows[8],
   },
+  backgroundColor: theme.palette.grey[50],
 }));
 
 const StyledChip = styled(Chip)(({ theme, status }) => ({
@@ -89,7 +87,9 @@ const StyledChip = styled(Chip)(({ theme, status }) => ({
       ? theme.palette.success.main
       : status === "Pending"
       ? theme.palette.warning.main
-      : theme.palette.error.main,
+      : status === "Rejected"
+      ? theme.palette.error.main
+      : theme.palette.grey[500],
   color: theme.palette.common.white,
 }));
 
@@ -125,16 +125,20 @@ const Student = () => {
     try {
       const response = await axios.get("http://localhost:3030/auth/getStaff");
       setStaffList(response.data.data);
-    } catch (error) {}
+    } catch (error) {
+      console.error("Error fetching staff list:", error);
+    }
   };
 
   const fetchDetails = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3030/opDetails/userId?userId=${getUserId()}`
+        `http://localhost:3030/opDetails/user/${getUserId()}`
       );
       setUserOpDetails(response.data.data);
-    } catch (error) {}
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+    }
   };
 
   const onSubmit = async (data) => {
@@ -143,10 +147,7 @@ const Student = () => {
         ...data,
         userId: getUserId(),
       };
-      const response = await axios.post(
-        `http://localhost:3030/opDetails`,
-        finalData
-      );
+      await axios.post(`http://localhost:3030/opDetails`, finalData);
       showToast("success", "Details submitted successfully!");
       fetchDetails();
       reset();
@@ -156,20 +157,17 @@ const Student = () => {
     }
   };
 
-  const assignToStaff = async (id) => {
+  const assignToStaff = async () => {
     try {
-      const response = await axios.post(
-        "http://localhost:3030/opDetails/assign",
-        {
-          id: selectedOpDetail._id,
-          staffId: id,
-        }
-      );
-      showToast("success", "Assigned to staff successfully!");
+      await axios.post("http://localhost:3030/opDetails/assign", {
+        id: selectedOpDetail._id,
+        staffId: selectedStaff,
+      });
+      showToast("success", "Assigned to Warden successfully!");
       fetchDetails();
       setAssignModalOpen(false);
     } catch (error) {
-      showToast("error", "Failed to assign to staff.");
+      showToast("error", "Failed to assign to Warden.");
     }
   };
 
@@ -206,45 +204,81 @@ const Student = () => {
             <Grid item xs={12} sm={6} md={4} key={detail._id}>
               <StyledCard>
                 <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    {detail.name}
-                  </Typography>
-                  <Typography color="textSecondary" gutterBottom>
-                    {detail.department} - {detail.rollno}
-                  </Typography>
-                  <Typography variant="body2" component="p">
-                    From: {new Date(detail.dateFrom).toLocaleDateString()}{" "}
-                    {detail.timeFrom}
-                  </Typography>
-                  <Typography variant="body2" component="p">
-                    To: {new Date(detail.dateTo).toLocaleDateString()}{" "}
-                    {detail.timeTo}
-                  </Typography>
-                  <Typography variant="body2" component="p">
-                    Reason: {detail.reason}
-                  </Typography>
-                  <Box mt={2}>
+                  <Box display="flex" alignItems="center" mb={2}>
+                    <Avatar sx={{ bgcolor: theme.palette.primary.main, mr: 2 }}>
+                      {detail.name.charAt(0)}
+                    </Avatar>
+                    <Box>
+                      <Typography variant="h6" gutterBottom>
+                        {detail.name}
+                      </Typography>
+                      <Typography color="textSecondary" variant="subtitle2">
+                        {detail.department} - {detail.rollno}
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <Divider sx={{ my: 2 }} />
+
+                  <Box display="flex" alignItems="center" mb={1}>
+                    <EventIcon color="action" sx={{ mr: 1 }} />
+                    <Typography variant="body2">
+                      From: {new Date(detail.dateFrom).toLocaleDateString()}
+                    </Typography>
+                  </Box>
+                  <Box display="flex" alignItems="center" mb={1}>
+                    <ScheduleIcon color="action" sx={{ mr: 1 }} />
+                    <Typography variant="body2">
+                      {detail.timeFrom} - {detail.timeTo}
+                    </Typography>
+                  </Box>
+                  <Box display="flex" alignItems="center" mb={1}>
+                    <LocationCityIcon color="action" sx={{ mr: 1 }} />
+                    <Typography variant="body2">{detail.city}</Typography>
+                  </Box>
+                  <Box display="flex" alignItems="flex-start" mb={1}>
+                    <DescriptionIcon color="action" sx={{ mr: 1, mt: 0.5 }} />
+                    <Typography variant="body2">{detail.reason}</Typography>
+                  </Box>
+
+                  <Box
+                    mt={2}
+                    display="flex"
+                    justifyContent="space-between"
+                    alignItems="center"
+                  >
                     <StyledChip
                       icon={<PersonIcon />}
-                      label={detail.isAccept ? "Accepted" : "Pending"}
-                      status={detail.isAccept ? "Accepted" : "Pending"}
+                      label={
+                        detail.isAccept === true
+                          ? "Accepted"
+                          : detail.isAccept === false
+                          ? "Rejected"
+                          : "Pending"
+                      }
+                      status={
+                        detail.isAccept === true
+                          ? "Accepted"
+                          : detail.isAccept === false
+                          ? "Rejected"
+                          : "Pending"
+                      }
                     />
+                    {!detail.staffId && (
+                      <Button
+                        size="small"
+                        color="primary"
+                        variant="outlined"
+                        onClick={() => {
+                          setSelectedOpDetail(detail);
+                          setAssignModalOpen(true);
+                        }}
+                      >
+                        Assign to Warden
+                      </Button>
+                    )}
                   </Box>
                 </CardContent>
-                <CardActions>
-                  {!detail.staffId && (
-                    <Button
-                      size="small"
-                      color="primary"
-                      onClick={() => {
-                        setSelectedOpDetail(detail);
-                        setAssignModalOpen(true);
-                      }}
-                    >
-                      Assign to Staff
-                    </Button>
-                  )}
-                </CardActions>
               </StyledCard>
             </Grid>
           ))}
@@ -393,12 +427,17 @@ const Student = () => {
       </Dialog>
 
       {/* Assign Staff Modal */}
-      <Dialog open={assignModalOpen} onClose={() => setAssignModalOpen(false)}>
-        <DialogTitle>Assign to Staff</DialogTitle>
+      <Dialog
+        open={assignModalOpen}
+        onClose={() => setAssignModalOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>Assign to Warden</DialogTitle>
         <DialogContent>
           <TextField
             select
-            label="Select Staff"
+            label="Select Warden"
             fullWidth
             variant="outlined"
             value={selectedStaff}
@@ -414,11 +453,7 @@ const Student = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAssignModalOpen(false)}>Cancel</Button>
-          <Button
-            onClick={() => assignToStaff(selectedOpDetail._id)}
-            color="primary"
-            variant="contained"
-          >
+          <Button onClick={assignToStaff} color="primary" variant="contained">
             Assign
           </Button>
         </DialogActions>
