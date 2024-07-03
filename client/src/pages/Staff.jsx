@@ -1,35 +1,69 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getAccessToken } from "../utils/tokenManager";
+import { getAccessToken, clearTokens } from "../utils/tokenManager";
 import axios from "axios";
-import { Container, Grid, Button, Modal, Box, Typography } from "@mui/material";
+import {
+  Container,
+  Grid,
+  Button,
+  Modal,
+  Box,
+  Typography,
+  AppBar,
+  Toolbar,
+  IconButton,
+  Card,
+  CardContent,
+  CardActions,
+  Chip,
+  ThemeProvider,
+  createTheme,
+} from "@mui/material";
+import LogoutIcon from '@mui/icons-material/Logout';
+import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import CancelIcon from '@mui/icons-material/Cancel';
+import PendingIcon from '@mui/icons-material/Pending';
+
+const theme = createTheme({
+  palette: {
+    primary: {
+      main: '#1b5e20',
+    },
+    secondary: {
+      main: '#b71c1c',
+    },
+    background: {
+      default: '#e8f5e9',
+      paper: '#c8e6c9',
+    },
+  },
+});
 
 const Staff = () => {
   const navigate = useNavigate();
-  const [opDetails, setOpDetails] = useState();
+  const [opDetails, setOpDetails] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [isAcceptModalOpen, setIsAcceptModalOpen] = useState(false);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
-console.log(opDetails)
+
   useEffect(() => {
     if (!getAccessToken()) {
       navigate("/login");
     } else {
-      // Fetch operation details by staff ID
-      axios
-        .get(
-          `http://localhost:3030/opDetails/staffId?staffId=${localStorage.getItem(
-            "userId"
-          )}`
-        )
-        .then((response) => {
-          setOpDetails(response.data?.data);
-        })
-        .catch((error) => {
-          console.error("Error fetching operation details:", error);
-        });
+      fetchOpDetails();
     }
   }, [navigate]);
+
+  const fetchOpDetails = () => {
+    axios
+      .get(`http://localhost:3030/opDetails/staffId?staffId=${localStorage.getItem("userId")}`)
+      .then((response) => {
+        setOpDetails(response.data?.data || []);
+      })
+      .catch((error) => {
+        console.error("Error fetching operation details:", error);
+      });
+  };
 
   const handleOpenAcceptModal = (request) => {
     setSelectedRequest(request);
@@ -46,20 +80,11 @@ console.log(opDetails)
     setIsRejectModalOpen(false);
     setSelectedRequest(null);
   };
-
   const handleAccept = () => {
     axios
-      .post("http://localhost:3030/opDetails/accept", {
-        id: selectedRequest.id,
-      })
-      .then((response) => {
-        setOpDetails(
-          opDetails.map((detail) =>
-            detail.id === selectedRequest.id
-              ? { ...detail, isAccept: true }
-              : detail
-          )
-        );
+      .post("http://localhost:3030/opDetails/accept", { id: selectedRequest._id })
+      .then(() => {
+        fetchOpDetails();
         handleCloseModal();
       })
       .catch((error) => {
@@ -69,17 +94,9 @@ console.log(opDetails)
 
   const handleReject = () => {
     axios
-      .post("http://localhost:3030/opDetails/reject", {
-        id: selectedRequest.id,
-      })
-      .then((response) => {
-        setOpDetails(
-          opDetails?.map((detail) =>
-            detail.id === selectedRequest.id
-              ? { ...detail, isAccept: false }
-              : detail
-          )
-        );
+      .post("http://localhost:3030/opDetails/reject", { id: selectedRequest._id })
+      .then(() => {
+        fetchOpDetails();
         handleCloseModal();
       })
       .catch((error) => {
@@ -88,54 +105,99 @@ console.log(opDetails)
   };
 
   return (
-    <Container>
-      <Typography variant="h4" style={{ color: "green", marginBottom: "20px" }}>
-        Staff Page
-      </Typography>
-      <Grid container spacing={3}>
-        {opDetails?.map((detail) => (
-          <Grid item xs={12} key={detail.id}>
-            <Box border={1} padding={2} borderColor="grey.400">
-              <Typography variant="h6">Request ID: {detail.id}</Typography>
-              <Typography>
-                Status:{" "}
-                {detail.isAccept === true
-                  ? "Accepted"
-                  : detail.isAccept === false
-                  ? "Rejected"
-                  : "Pending"}
-              </Typography>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => handleOpenAcceptModal(detail)}
-                disabled={detail.isAccept !== null}
-                style={{ marginRight: "10px" }}
-              >
-                Accept
-              </Button>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={() => handleOpenRejectModal(detail)}
-                disabled={detail.isAccept !== null}
-              >
-                Reject
-              </Button>
-            </Box>
-          </Grid>
-        ))}
-      </Grid>
+    <ThemeProvider theme={theme}>
+      <Box sx={{ flexGrow: 1 }}>
+        <AppBar position="static">
+          <Toolbar>
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              Staff Dashboard
+            </Typography>
+            <IconButton
+              color="inherit"
+              onClick={() => {
+                clearTokens();
+                navigate("/login");
+              }}
+            >
+              <LogoutIcon />
+            </IconButton>
+          </Toolbar>
+        </AppBar>
+      </Box>
+      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+        <Typography variant="h4" gutterBottom>
+          Outpass Requests
+        </Typography>
+        <Grid container spacing={3}>
+          {opDetails.map((detail) => (
+            <Grid item xs={12} sm={6} md={4} key={detail.id}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Request ID: {detail.id}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    Student: {detail.name}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    From: {new Date(detail.dateFrom).toLocaleDateString()} {detail.timeFrom}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    To: {new Date(detail.dateTo).toLocaleDateString()} {detail.timeTo}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" gutterBottom>
+                    Reason: {detail.reason}
+                  </Typography>
+                  <Box mt={2}>
+                    <Chip
+                      icon={
+                        detail.isAccept === true ? <CheckCircleIcon /> :
+                        detail.isAccept === false ? <CancelIcon /> : <PendingIcon />
+                      }
+                      label={
+                        detail.isAccept === true ? "Accepted" :
+                        detail.isAccept === false ? "Rejected" : "Pending"
+                      }
+                      color={
+                        detail.isAccept === true ? "success" :
+                        detail.isAccept === false ? "error" : "warning"
+                      }
+                    />
+                  </Box>
+                </CardContent>
+                <CardActions>
+                  <Button
+                    size="small"
+                    color="primary"
+                    onClick={() => handleOpenAcceptModal(detail)}
+                    disabled={detail.isAccept !== null}
+                  >
+                    Accept
+                  </Button>
+                  <Button
+                    size="small"
+                    color="secondary"
+                    onClick={() => handleOpenRejectModal(detail)}
+                    disabled={detail.isAccept !== null}
+                  >
+                    Reject
+                  </Button>
+                </CardActions>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+      </Container>
 
       <Modal open={isAcceptModalOpen} onClose={handleCloseModal}>
-        <Box sx={{ ...modalStyle }}>
-          <Typography variant="h6">Confirm Accept</Typography>
+        <Box sx={modalStyle}>
+          <Typography variant="h6" gutterBottom>Confirm Accept</Typography>
           <Typography>Are you sure you want to accept this request?</Typography>
           <Button
             onClick={handleAccept}
             variant="contained"
             color="primary"
-            style={{ marginTop: "20px" }}
+            sx={{ mt: 2 }}
           >
             Confirm
           </Button>
@@ -143,20 +205,20 @@ console.log(opDetails)
       </Modal>
 
       <Modal open={isRejectModalOpen} onClose={handleCloseModal}>
-        <Box sx={{ ...modalStyle }}>
-          <Typography variant="h6">Confirm Reject</Typography>
+        <Box sx={modalStyle}>
+          <Typography variant="h6" gutterBottom>Confirm Reject</Typography>
           <Typography>Are you sure you want to reject this request?</Typography>
           <Button
             onClick={handleReject}
             variant="contained"
             color="secondary"
-            style={{ marginTop: "20px" }}
+            sx={{ mt: 2 }}
           >
             Confirm
           </Button>
         </Box>
       </Modal>
-    </Container>
+    </ThemeProvider>
   );
 };
 
