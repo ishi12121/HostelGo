@@ -20,6 +20,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { setTokens, getAccessToken } from "../utils/tokenManager";
 import SchoolIcon from "@mui/icons-material/School";
 import WorkIcon from "@mui/icons-material/Work";
+import { baseURL } from "../context/ApiInterceptor";
 
 // Validation schema
 const schema = yup.object().shape({
@@ -126,7 +127,6 @@ const RoleSelection = styled(Box)(({ theme }) => ({
     color: "#fff",
   },
 }));
-
 const LoginForm = () => {
   const navigate = useNavigate();
   const {
@@ -159,10 +159,10 @@ const LoginForm = () => {
     }
     setResponse(false);
   }, [response]);
-
+ 
   const onSubmit = async (data) => {
     try {
-      const url = "http://localhost:3030/auth/login";
+      const url = `${baseURL}/auth/login`;
       const response = await axios.post(url, {
         role: data.role,
         email: data.email,
@@ -175,7 +175,6 @@ const LoginForm = () => {
       showToast("success", response.data.message || "Login successful!");
       setResponse(true);
     } catch (error) {
-      console.error("Error during login:", error);
       showToast("error", "Login failed. Please try again.");
       setResponse(false);
     }

@@ -33,6 +33,7 @@ import {
   Description as DescriptionIcon,
   Person as PersonIcon,
 } from "@mui/icons-material";
+import { baseURL } from "../context/ApiInterceptor";
 
 const theme = createTheme({
   palette: {
@@ -82,7 +83,7 @@ const Staff = () => {
   const fetchOpDetails = () => {
     axios
       .get(
-        `http://localhost:3030/opDetails/staff/${localStorage.getItem(
+        `${baseURL}/opDetails/staff/${localStorage.getItem(
           "userId"
         )}`
       )
@@ -112,7 +113,7 @@ const Staff = () => {
 
   const handleAccept = () => {
     axios
-      .post("http://localhost:3030/opDetails/accept", {
+      .post(`${baseURL}/opDetails/accept`, {
         id: selectedRequest._id,
       })
       .then(() => {
@@ -126,7 +127,7 @@ const Staff = () => {
 
   const handleReject = () => {
     axios
-      .post("http://localhost:3030/opDetails/reject", {
+      .post(`${baseURL}/opDetails/reject`, {
         id: selectedRequest._id,
       })
       .then(() => {

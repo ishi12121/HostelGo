@@ -21,6 +21,7 @@ import Toast from "../components/Toast";
 import { Link, useNavigate } from "react-router-dom";
 import SchoolIcon from "@mui/icons-material/School";
 import WorkIcon from "@mui/icons-material/Work";
+import { baseURL } from "../context/ApiInterceptor";
 
 // Validation schema
 const schema = yup.object().shape({
@@ -148,8 +149,8 @@ const RegisterForm = () => {
     try {
       const url =
         role === "student"
-          ? "http://localhost:3030/auth/register/user"
-          : "http://localhost:3030/auth/register/staff";
+          ? `${baseURL}/auth/register/user`
+          : `${baseURL}/auth/register/staff`;
 
       const response = await axios.post(url, {
         email: data.email,

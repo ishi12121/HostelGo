@@ -23,6 +23,7 @@ import {
   IconButton,
   Divider,
   Avatar,
+  Tooltip,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import axios from "axios";
@@ -42,6 +43,7 @@ import {
   LocationCity as LocationCityIcon,
   Description as DescriptionIcon,
 } from "@mui/icons-material";
+import { baseURL } from "../context/ApiInterceptor";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
@@ -123,7 +125,7 @@ const Student = () => {
 
   const fetchStaffList = async () => {
     try {
-      const response = await axios.get("http://localhost:3030/auth/getStaff");
+      const response = await axios.get(`${baseURL}/auth/getStaff`);
       setStaffList(response.data.data);
     } catch (error) {
       console.error("Error fetching staff list:", error);
@@ -133,7 +135,7 @@ const Student = () => {
   const fetchDetails = async () => {
     try {
       const response = await axios.get(
-        `http://localhost:3030/opDetails/user/${getUserId()}`
+        `${baseURL}/opDetails/user/${getUserId()}`
       );
       setUserOpDetails(response.data.data);
     } catch (error) {
@@ -147,7 +149,7 @@ const Student = () => {
         ...data,
         userId: getUserId(),
       };
-      await axios.post(`http://localhost:3030/opDetails`, finalData);
+      await axios.post(`${baseURL}/opDetails`, finalData);
       showToast("success", "Details submitted successfully!");
       fetchDetails();
       reset();
@@ -159,7 +161,7 @@ const Student = () => {
 
   const assignToStaff = async () => {
     try {
-      await axios.post("http://localhost:3030/opDetails/assign", {
+      await axios.post(`${baseURL}/opDetails/assign`, {
         id: selectedOpDetail._id,
         staffId: selectedStaff,
       });
@@ -184,18 +186,22 @@ const Student = () => {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Student Dashboard
           </Typography>
-          <IconButton color="inherit" onClick={() => setFormModalOpen(true)}>
-            <AddIcon />
-          </IconButton>
-          <IconButton
-            color="inherit"
-            onClick={() => {
-              clearTokens();
-              navigate("/login");
-            }}
-          >
-            <LogoutIcon />
-          </IconButton>
+          <Tooltip title="Fill outPass Form" placement="bottom" arrow>
+            <IconButton color="inherit" onClick={() => setFormModalOpen(true)}>
+              <AddIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="logout" placement="bottom" arrow>
+            <IconButton
+              color="inherit"
+              onClick={() => {
+                clearTokens();
+                navigate("/login");
+              }}
+            >
+              <LogoutIcon />
+            </IconButton>
+          </Tooltip>
         </Toolbar>
       </AppBar>
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
