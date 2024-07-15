@@ -18,6 +18,7 @@ import Register from "./pages/Register";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Student from "./pages/Student";
 import Staff from "./pages/Staff";
+import Security from "./pages/Security";
 
 function App() {
   return (
@@ -34,17 +35,17 @@ function App() {
 function Main() {
   const navigate = useNavigate();
   const location = useLocation();
-  const role = localStorage.getItem('role');
+  const role = localStorage.getItem("role");
 
   useEffect(() => {
     // Redirect based on role when accessing the root path
-    if (location.pathname === '/') {
-      if (role === 'student') {
-        navigate('/student');
-      } else if (role === 'staff') {
-        navigate('/staff');
+    if (location.pathname === "/") {
+      if (role === "student") {
+        navigate("/student");
+      } else if (role === "staff") {
+        navigate("/staff");
       } else {
-        navigate('/login');
+        navigate("/login");
       }
     }
   }, [location.pathname, navigate, role]);
@@ -53,8 +54,22 @@ function Main() {
     <>
       <Container>
         <Routes>
-          <Route path="/student" element={role === 'student' ? <Student /> : <Navigate to="/login" />} />
-          <Route path="/staff" element={role === 'staff' ? <Staff /> : <Navigate to="/login" />} />
+          <Route
+            path="/student"
+            element={
+              role === "student" ? <Student /> : <Navigate to="/login" />
+            }
+          />
+          <Route
+            path="/staff"
+            element={role === "staff" ? <Staff /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/security"
+            element={
+              role === "security" ? <Security /> : <Navigate to="/login" />
+            }
+          />
           <Route path="/about" element={<About />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

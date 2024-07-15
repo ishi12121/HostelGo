@@ -1,4 +1,4 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const outpassDetailsSchema = new mongoose.Schema({
   staffId: String,
@@ -17,7 +17,8 @@ const outpassDetailsSchema = new mongoose.Schema({
   city: String,
   isAccept: Boolean,
   rejectReason: String,
+  isScanned: Boolean,
 });
 
-const OutpassDetails = mongoose.model('OutpassDetails', outpassDetailsSchema);
+const OutpassDetails = mongoose.model("OutpassDetails", outpassDetailsSchema);
 export default OutpassDetails;
