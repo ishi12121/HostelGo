@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
+import QRCode from "qrcode.react";
 import {
   Container,
   TextField,
   Button,
   Typography,
   Box,
-  Paper,
   ThemeProvider,
   createTheme,
   MenuItem,
@@ -104,7 +104,7 @@ const Student = () => {
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [selectedOpDetail, setSelectedOpDetail] = useState(null);
-
+  const [qrModalOpen, setQrModalOpen] = useState(false);
   const {
     register,
     handleSubmit,
@@ -285,6 +285,20 @@ const Student = () => {
                     )}
                   </Box>
                 </CardContent>
+                <CardActions>
+                  {detail.isAccept && (
+                    <Button
+                      size="small"
+                      color="primary"
+                      onClick={() => {
+                        setSelectedOpDetail(detail);
+                        setQrModalOpen(true);
+                      }}
+                    >
+                      View Ticket
+                    </Button>
+                  )}
+                </CardActions>
               </StyledCard>
             </Grid>
           ))}
@@ -463,6 +477,28 @@ const Student = () => {
             Assign
           </Button>
         </DialogActions>
+      </Dialog>
+      {/* QR Code Modal */}
+      <Dialog open={qrModalOpen} onClose={() => setQrModalOpen(false)}>
+        <DialogTitle>Outpass QR Code</DialogTitle>
+        <DialogContent>
+          {selectedOpDetail && (
+            <Box display="flex" flexDirection="column" alignItems="center">
+              <QRCode value={selectedOpDetail._id} size={256} />
+              <Typography variant="h6" mt={2}>
+                {selectedOpDetail.name}
+              </Typography>
+              <Typography variant="body1">
+                Roll No: {selectedOpDetail.rollno}
+              </Typography>
+              <Typography variant="body2">
+                Valid from:{" "}
+                {new Date(selectedOpDetail.dateFrom).toLocaleDateString()} to{" "}
+                {new Date(selectedOpDetail.dateTo).toLocaleDateString()}
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
       </Dialog>
     </ThemeProvider>
   );

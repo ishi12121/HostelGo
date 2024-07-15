@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   TextField,
@@ -11,6 +11,7 @@ import {
   createTheme,
 } from "@mui/material";
 import { styled, keyframes } from "@mui/system";
+import Modal from "@mui/material/Modal";
 import axios from "axios";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -137,6 +138,11 @@ const LoginForm = () => {
     watch,
   } = useForm({
     resolver: yupResolver(schema),
+    defaultValues: {
+      role: "",
+      email: "",
+      password: "",
+    },
   });
 
   const { open, severity, message, showToast, hideToast } = useToast();
@@ -150,6 +156,8 @@ const LoginForm = () => {
         navigate("/student");
       } else if (role === "staff") {
         navigate("/staff");
+      } else if (role === "security") {
+        navigate("/security");
       } else {
         navigate("/");
       }
@@ -159,7 +167,7 @@ const LoginForm = () => {
     }
     setResponse(false);
   }, [response]);
- 
+
   const onSubmit = async (data) => {
     try {
       const url = `${baseURL}/auth/login`;
@@ -186,6 +194,24 @@ const LoginForm = () => {
   };
 
   const theme = selectedRole === "student" ? studentTheme : staffTheme;
+  const [securityModalOpen, setSecurityModalOpen] = useState(false);
+  const [tapCount, setTapCount] = useState(0);
+  const handleCopyrightClick = useCallback(() => {
+    setTapCount((prevCount) => {
+      const newCount = prevCount + 1;
+      if (newCount >= 10) {
+        setSecurityModalOpen(true);
+        return 0;
+      }
+      return newCount;
+    });
+  }, []);
+  useEffect(() => {
+    if (tapCount > 0 && tapCount < 6) {
+      const timer = setTimeout(() => setTapCount(0), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [tapCount]);
 
   return (
     <ThemeProvider theme={theme}>
@@ -199,7 +225,12 @@ const LoginForm = () => {
       <Container
         component="main"
         maxWidth="xs"
-        sx={{ minHeight: "100vh", display: "flex", alignItems: "center" }}
+        sx={{
+          minHeight: "100vh",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
       >
         <StyledPaper elevation={6}>
           <Typography
@@ -284,8 +315,69 @@ const LoginForm = () => {
           <Typography variant="body2" style={{ marginTop: "1rem" }}>
             Don't have an account? <Link to="/register">Register here</Link>
           </Typography>
+          <Typography
+            variant="body2"
+            sx={{
+              marginTop: 2,
+              opacity: 0.7,
+            }}
+            onClick={handleCopyrightClick}
+          >
+            HostelGo ©️ 2024
+          </Typography>
         </StyledPaper>
       </Container>
+      <Modal
+        open={securityModalOpen}
+        onClose={() => setSecurityModalOpen(false)}
+        aria-labelledby="security-login-modal"
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            p: 4,
+            borderRadius: 2,
+          }}
+        >
+          <Typography variant="h6" component="h2" gutterBottom>
+            Security Login
+          </Typography>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <TextField
+              {...register("email")}
+              label="Email"
+              fullWidth
+              error={!!errors.email}
+              helperText={errors.email?.message}
+              margin="normal"
+            />
+            <TextField
+              {...register("password")}
+              label="Password"
+              fullWidth
+              type="password"
+              error={!!errors.password}
+              helperText={errors.password?.message}
+              margin="normal"
+            />
+            <Button
+              fullWidth
+              variant="contained"
+              type="submit"
+              sx={{ mt: 2 }}
+              onClick={() => setValue("role", "security")}
+            >
+              Login as Security
+            </Button>
+          </form>
+        </Box>
+      </Modal>
     </ThemeProvider>
   );
 };
