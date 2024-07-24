@@ -1,17 +1,51 @@
-// components/ReusableTable.js
-import React, { useState } from 'react';
-import { 
-  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, 
-  Checkbox, Button, TablePagination 
-} from '@mui/material';
+import React, { useState } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Checkbox,
+  Button,
+  TablePagination,
+  Typography,
+  Box,
+  Toolbar,
+  IconButton,
+} from "@mui/material";
+import { styled } from "@mui/material/styles";
 import { jsPDF } from "jspdf";
 import "jspdf-autotable";
-import * as XLSX from 'xlsx';
+import * as XLSX from "xlsx";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
+
+import TableViewIcon from "@mui/icons-material/TableView";
+const StyledTableCell = styled(TableCell)(({ theme }) => ({
+  "&.MuiTableCell-head": {
+    backgroundColor: theme.palette.primary.main,
+    color: theme.palette.common.white,
+    fontWeight: "bold",
+  },
+}));
+
+const StyledTableRow = styled(TableRow)(({ theme }) => ({
+  "&:nth-of-type(odd)": {
+    backgroundColor: theme.palette.action.hover,
+  },
+  "&:last-child td, &:last-child th": {
+    border: 0,
+  },
+  "&:hover": {
+    backgroundColor: theme.palette.action.selected,
+  },
+}));
 
 const ReusableTable = ({ columns, data, title }) => {
   const [selected, setSelected] = useState([]);
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
@@ -35,7 +69,7 @@ const ReusableTable = ({ columns, data, title }) => {
     } else if (selectedIndex > 0) {
       newSelected = newSelected.concat(
         selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
+        selected.slice(selectedIndex + 1)
       );
     }
 
@@ -57,17 +91,17 @@ const ReusableTable = ({ columns, data, title }) => {
     const doc = new jsPDF();
     doc.text(title, 20, 10);
     doc.autoTable({
-      head: [columns.map(column => column.label)],
-      body: data.filter(row => selected.includes(row.id)).map(row => 
-        columns.map(column => row[column.id])
-      ),
+      head: [columns.map((column) => column.label)],
+      body: data
+        .filter((row) => selected.includes(row.id))
+        .map((row) => columns.map((column) => row[column.id])),
     });
     doc.save(`${title}.pdf`);
   };
 
   const exportToExcel = () => {
     const ws = XLSX.utils.json_to_sheet(
-      data.filter(row => selected.includes(row.id))
+      data.filter((row) => selected.includes(row.id))
     );
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
@@ -75,45 +109,74 @@ const ReusableTable = ({ columns, data, title }) => {
   };
 
   return (
-    <Paper>
+    <Paper elevation={3}>
+      <Toolbar>
+        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+          {title}
+        </Typography>
+        <Box>
+          <IconButton
+            onClick={exportToPDF}
+            disabled={selected.length === 0}
+            color="primary"
+            title="Export to PDF"
+          >
+            <PictureAsPdfIcon />
+          </IconButton>
+          <IconButton
+            onClick={exportToExcel}
+            disabled={selected.length === 0}
+            color="primary"
+            title="Export to Excel"
+          >
+            <TableViewIcon />
+          </IconButton>
+        </Box>
+      </Toolbar>
       <TableContainer>
-        <Table>
+        <Table stickyHeader aria-label={title}>
           <TableHead>
             <TableRow>
-              <TableCell padding="checkbox">
+              <StyledTableCell padding="checkbox">
                 <Checkbox
-                  indeterminate={selected.length > 0 && selected.length < data.length}
+                  indeterminate={
+                    selected.length > 0 && selected.length < data.length
+                  }
                   checked={data.length > 0 && selected.length === data.length}
                   onChange={handleSelectAllClick}
                 />
-              </TableCell>
+              </StyledTableCell>
               {columns.map((column) => (
-                <TableCell key={column.id}>{column.label}</TableCell>
+                <StyledTableCell key={column.id}>
+                  {column.label}
+                </StyledTableCell>
               ))}
             </TableRow>
           </TableHead>
           <TableBody>
-            {data.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row, index) => {
-              const isItemSelected = isSelected(row.id);
-              return (
-                <TableRow
-                  hover
-                  onClick={(event) => handleClick(event, row.id)}
-                  role="checkbox"
-                  aria-checked={isItemSelected}
-                  tabIndex={-1}
-                  key={row.id}
-                  selected={isItemSelected}
-                >
-                  <TableCell padding="checkbox">
-                    <Checkbox checked={isItemSelected} />
-                  </TableCell>
-                  {columns.map((column) => (
-                    <TableCell key={column.id}>{row[column.id]}</TableCell>
-                  ))}
-                </TableRow>
-              );
-            })}
+            {data
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((row, index) => {
+                const isItemSelected = isSelected(row.id);
+                return (
+                  <StyledTableRow
+                    hover
+                    onClick={(event) => handleClick(event, row.id)}
+                    role="checkbox"
+                    aria-checked={isItemSelected}
+                    tabIndex={-1}
+                    key={row.id}
+                    selected={isItemSelected}
+                  >
+                    <TableCell padding="checkbox">
+                      <Checkbox checked={isItemSelected} />
+                    </TableCell>
+                    {columns.map((column) => (
+                      <TableCell key={column.id}>{row[column.id]}</TableCell>
+                    ))}
+                  </StyledTableRow>
+                );
+              })}
           </TableBody>
         </Table>
       </TableContainer>
@@ -126,8 +189,6 @@ const ReusableTable = ({ columns, data, title }) => {
         onPageChange={handleChangePage}
         onRowsPerPageChange={handleChangeRowsPerPage}
       />
-      <Button onClick={exportToPDF} disabled={selected.length === 0}>Export to PDF</Button>
-      <Button onClick={exportToExcel} disabled={selected.length === 0}>Export to Excel</Button>
     </Paper>
   );
 };
