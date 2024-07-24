@@ -11,8 +11,6 @@ import { AppProvider } from "./context/AppContext";
 import About from "./pages/About";
 import Login from "./pages/Login";
 import ErrorPage from "./pages/ErrorPage";
-import { Container } from "@mui/material";
-import "./App.css";
 import { ApiProvider } from "./context/ApiContext";
 import Register from "./pages/Register";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -52,30 +50,26 @@ function Main() {
 
   return (
     <>
-      <Container>
-        <Routes>
-          <Route
-            path="/student"
-            element={
-              role === "student" ? <Student /> : <Navigate to="/login" />
-            }
-          />
-          <Route
-            path="/staff"
-            element={role === "staff" ? <Staff /> : <Navigate to="/login" />}
-          />
-          <Route
-            path="/security"
-            element={
-              role === "security" ? <Security /> : <Navigate to="/login" />
-            }
-          />
-          <Route path="/about" element={<About />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="*" element={<ErrorPage />} />
-        </Routes>
-      </Container>
+      <Routes>
+        <Route
+          path="/student"
+          element={role === "student" ? <Student /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/staff"
+          element={role === "staff" ? <Staff /> : <Navigate to="/login" />}
+        />
+        <Route
+          path="/security"
+          element={
+            role === "security" ? <Security /> : <Navigate to="/login" />
+          }
+        />
+        <Route path="/about" element={<About />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path="*" element={<ErrorPage />} />
+      </Routes>
     </>
   );
 }
