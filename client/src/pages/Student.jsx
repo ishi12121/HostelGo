@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
+import QRCode from "qrcode.react";
 import {
   Container,
   TextField,
   Button,
   Typography,
   Box,
-  Paper,
   ThemeProvider,
   createTheme,
   MenuItem,
@@ -23,6 +23,7 @@ import {
   IconButton,
   Divider,
   Avatar,
+  Tooltip,
 } from "@mui/material";
 import { styled } from "@mui/system";
 import axios from "axios";
@@ -42,6 +43,7 @@ import {
   LocationCity as LocationCityIcon,
   Description as DescriptionIcon,
 } from "@mui/icons-material";
+import { baseURL } from "../context/ApiInterceptor";
 
 const schema = yup.object().shape({
   name: yup.string().required("Name is required"),
@@ -102,7 +104,7 @@ const Student = () => {
   const [formModalOpen, setFormModalOpen] = useState(false);
   const [assignModalOpen, setAssignModalOpen] = useState(false);
   const [selectedOpDetail, setSelectedOpDetail] = useState(null);
-
+  const [qrModalOpen, setQrModalOpen] = useState(false);
   const {
     register,
     handleSubmit,
@@ -123,17 +125,27 @@ const Student = () => {
 
   const fetchStaffList = async () => {
     try {
-      const response = await axios.get("http://localhost:3030/auth/getStaff");
+      const token = getAccessToken(); 
+      const response = await axios.get(`${baseURL}/auth/getStaff`, {
+        headers: {
+          "x-auth-token": token
+        }
+      });
       setStaffList(response.data.data);
     } catch (error) {
       console.error("Error fetching staff list:", error);
     }
   };
-
+  
   const fetchDetails = async () => {
     try {
+      const token  = getAccessToken();
       const response = await axios.get(
-        `http://localhost:3030/opDetails/user/${getUserId()}`
+        `${baseURL}/opDetails/user/${getUserId()}`,{
+          headers: {
+              'x-auth-token':token    
+          }
+        }
       );
       setUserOpDetails(response.data.data);
     } catch (error) {
@@ -143,11 +155,16 @@ const Student = () => {
 
   const onSubmit = async (data) => {
     try {
+      const token = getAccessToken();
       const finalData = {
         ...data,
         userId: getUserId(),
       };
-      await axios.post(`http://localhost:3030/opDetails`, finalData);
+      await axios.post(`${baseURL}/opDetails`, finalData,{
+        headers: {
+          "x-auth-token":token
+          }
+      });
       showToast("success", "Details submitted successfully!");
       fetchDetails();
       reset();
@@ -159,10 +176,13 @@ const Student = () => {
 
   const assignToStaff = async () => {
     try {
-      await axios.post("http://localhost:3030/opDetails/assign", {
+      const token = getAccessToken();
+      await axios.post(`${baseURL}/opDetails/assign`, {
         id: selectedOpDetail._id,
         staffId: selectedStaff,
-      });
+      },{headers:{
+        "x-auth-token":token
+      }});
       showToast("success", "Assigned to Warden successfully!");
       fetchDetails();
       setAssignModalOpen(false);
@@ -184,18 +204,22 @@ const Student = () => {
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Student Dashboard
           </Typography>
-          <IconButton color="inherit" onClick={() => setFormModalOpen(true)}>
-            <AddIcon />
-          </IconButton>
-          <IconButton
-            color="inherit"
-            onClick={() => {
-              clearTokens();
-              navigate("/login");
-            }}
-          >
-            <LogoutIcon />
-          </IconButton>
+          <Tooltip title="Fill outPass Form" placement="bottom" arrow>
+            <IconButton color="inherit" onClick={() => setFormModalOpen(true)}>
+              <AddIcon />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="logout" placement="bottom" arrow>
+            <IconButton
+              color="inherit"
+              onClick={() => {
+                clearTokens();
+                navigate("/login");
+              }}
+            >
+              <LogoutIcon />
+            </IconButton>
+          </Tooltip>
         </Toolbar>
       </AppBar>
       <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -279,6 +303,20 @@ const Student = () => {
                     )}
                   </Box>
                 </CardContent>
+                <CardActions>
+                  {detail.isAccept && (
+                    <Button
+                      size="small"
+                      color="primary"
+                      onClick={() => {
+                        setSelectedOpDetail(detail);
+                        setQrModalOpen(true);
+                      }}
+                    >
+                      View Ticket
+                    </Button>
+                  )}
+                </CardActions>
               </StyledCard>
             </Grid>
           ))}
@@ -457,6 +495,28 @@ const Student = () => {
             Assign
           </Button>
         </DialogActions>
+      </Dialog>
+      {/* QR Code Modal */}
+      <Dialog open={qrModalOpen} onClose={() => setQrModalOpen(false)}>
+        <DialogTitle>Outpass QR Code</DialogTitle>
+        <DialogContent>
+          {selectedOpDetail && (
+            <Box display="flex" flexDirection="column" alignItems="center">
+              <QRCode value={selectedOpDetail._id} size={256} />
+              <Typography variant="h6" mt={2}>
+                {selectedOpDetail.name}
+              </Typography>
+              <Typography variant="body1">
+                Roll No: {selectedOpDetail.rollno}
+              </Typography>
+              <Typography variant="body2">
+                Valid from:{" "}
+                {new Date(selectedOpDetail.dateFrom).toLocaleDateString()} to{" "}
+                {new Date(selectedOpDetail.dateTo).toLocaleDateString()}
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
       </Dialog>
     </ThemeProvider>
   );

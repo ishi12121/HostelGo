@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
   TextField,
@@ -9,8 +9,6 @@ import {
   Paper,
   ThemeProvider,
   createTheme,
-  IconButton,
-  Grid,
 } from "@mui/material";
 import { styled, keyframes } from "@mui/system";
 import axios from "axios";
@@ -21,7 +19,8 @@ import Toast from "../components/Toast";
 import { Link, useNavigate } from "react-router-dom";
 import SchoolIcon from "@mui/icons-material/School";
 import WorkIcon from "@mui/icons-material/Work";
-
+import { baseURL } from "../context/ApiInterceptor";
+import Modal from "@mui/material/Modal";
 // Validation schema
 const schema = yup.object().shape({
   role: yup.string().required("Role is required"),
@@ -58,7 +57,6 @@ const staffTheme = createTheme({
   },
 });
 
-// Animations and styled components
 const fadeIn = keyframes`
   from {
     opacity: 0;
@@ -146,10 +144,15 @@ const RegisterForm = () => {
 
   const onSubmit = async (data) => {
     try {
-      const url =
-        role === "student"
-          ? "http://localhost:3030/auth/register/user"
-          : "http://localhost:3030/auth/register/staff";
+      let url;
+      if (data.role === "security") {
+        url = `${baseURL}/auth/register/Security`;
+      } else {
+        url =
+          data.role === "student"
+            ? `${baseURL}/auth/register/user`
+            : `${baseURL}/auth/register/staff`;
+      }
 
       const response = await axios.post(url, {
         email: data.email,
@@ -157,13 +160,12 @@ const RegisterForm = () => {
       });
 
       showToast("success", response.data.message || "Registration successful!");
-      setTimeout(() => navigate("/login"), 2000); // Redirect to login page after 2 seconds
+      setTimeout(() => navigate("/login"), 2000);
     } catch (error) {
       console.error("Error during registration:", error);
       showToast("error", "Registration failed. Please try again.");
     }
   };
-
   const handleRoleSelection = (role) => {
     setValue("role", role);
     setSelectedRole(role);
@@ -171,6 +173,26 @@ const RegisterForm = () => {
 
   const theme = selectedRole === "student" ? studentTheme : staffTheme;
 
+  const [tapCount, setTapCount] = useState(0);
+  const [securityModalOpen, setSecurityModalOpen] = useState(false);
+
+  const handleCopyrightClick = useCallback(() => {
+    setTapCount((prevCount) => {
+      const newCount = prevCount + 1;
+      if (newCount >= 10) {
+        setSecurityModalOpen(true);
+        return 0;
+      }
+      return newCount;
+    });
+  }, []);
+
+  useEffect(() => {
+    if (tapCount > 0 && tapCount < 6) {
+      const timer = setTimeout(() => setTapCount(0), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [tapCount]);
   return (
     <ThemeProvider theme={theme}>
       <Background />
@@ -268,8 +290,69 @@ const RegisterForm = () => {
           <Typography variant="body2" style={{ marginTop: "1rem" }}>
             Already have an account? <Link to="/login">Login here</Link>
           </Typography>
+          <Typography
+            variant="body2"
+            sx={{
+              marginTop: 2,
+              opacity: 0.7,
+            }}
+            onClick={handleCopyrightClick}
+          >
+            HostelGo ©️ 2024
+          </Typography>
         </StyledPaper>
       </Container>
+      <Modal
+        open={securityModalOpen}
+        onClose={() => setSecurityModalOpen(false)}
+        aria-labelledby="security-register-modal"
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            p: 4,
+            borderRadius: 2,
+          }}
+        >
+          <Typography variant="h6" component="h2" gutterBottom>
+            Security Guard Registration
+          </Typography>
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <TextField
+              {...register("email")}
+              label="Email"
+              fullWidth
+              error={!!errors.email}
+              helperText={errors.email?.message}
+              margin="normal"
+            />
+            <TextField
+              {...register("password")}
+              label="Password"
+              fullWidth
+              type="password"
+              error={!!errors.password}
+              helperText={errors.password?.message}
+              margin="normal"
+            />
+            <Button
+              fullWidth
+              variant="contained"
+              type="submit"
+              sx={{ mt: 2 }}
+              onClick={() => setValue("role", "security")}
+            >
+              Register as Security Guard
+            </Button>
+          </form>
+        </Box>
+      </Modal>
     </ThemeProvider>
   );
 };

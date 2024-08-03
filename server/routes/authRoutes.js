@@ -1,20 +1,20 @@
-const express = require("express");
-const yup = require("yup");
+import express from "express";
+import * as yup from "yup";
+import * as authController from "../controllers/authController.js";
+import { verifyToken } from "../middleware/authmiddleware.js";
+
 const router = express.Router();
-const authController = require("../controllers/authController");
 
 const validateRequest = (schema) => async (req, res, next) => {
   try {
     await schema.validate(req.body, { abortEarly: false });
     next();
   } catch (error) {
-    res
-      .status(400)
-      .json({
-        status: "error",
-        message: "Invalid field values",
-        errorMessage: error.errors,
-      });
+    res.status(400).json({
+      status: "error",
+      message: "Invalid field values",
+      errorMessage: error.errors,
+    });
   }
 };
 
@@ -32,18 +32,31 @@ const loginSchema = yup.object({
   role: yup.string().required("Role is required"),
 });
 
+const registerSecuritySchema = yup.object({
+  email: yup.string().email("Email is required").required(),
+  password: yup
+    .string()
+    .min(6, "Password must be at least 6 characters long")
+    .required(),
+});
+
 router.post(
   "/register/user",
   validateRequest(registerSchema),
   authController.registerUser
 );
-
 router.post(
   "/register/staff",
   validateRequest(registerSchema),
   authController.registerStaff
 );
-
+router.post(
+  "/register/security",
+  validateRequest(registerSecuritySchema),
+  authController.registerSecurity
+);
 router.post("/login", validateRequest(loginSchema), authController.login);
-router.get("/getStaff",authController.GetAllStaff)
-module.exports = router;
+router.get("/getStaff",verifyToken ,authController.GetAllStaff);
+router.post("/refresh",authController.refreshToken)
+
+export default router;

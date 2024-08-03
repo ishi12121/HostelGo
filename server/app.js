@@ -1,16 +1,19 @@
-require("dotenv").config();
-const express = require("express");
-const cors = require("cors");
-const mongoose = require("mongoose");
-const bodyparser = require("body-parser");
-const cookieparser = require("cookie-parser");
-const morgan = require("morgan");
+import dotenv from "dotenv";
+import express from "express";
+import cors from "cors";
+import mongoose from "mongoose";
+import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
+import morgan from "morgan";
+
+// Load environment variables from .env file
+dotenv.config();
 
 const app = express();
-app.use(bodyparser.json());
-app.use(bodyparser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(cookieparser());
+app.use(cookieParser());
 
 const corsOptions = {
   origin: process.env.CORS_URL,
@@ -52,16 +55,22 @@ async function checkConnection() {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    console.log("Connected");
+    console.log("Connected to MongoDB");
   } catch (error) {
-    console.log("Not Connected :", error.message);
+    console.log("Error connecting to MongoDB:", error.message);
   }
 }
 
 checkConnection();
 
-app.use("/opDetails", require("./routes/opDetailsRoutes"));
-app.use("/auth", require("./routes/authRoutes"));
+// Import routes
+import opDetailsRoutes from "./routes/opDetailsRoutes.js";
+import authRoutes from "./routes/authRoutes.js";
+import SecurityGuardRoutes from "./routes/SecurityGuardRoutes.js";
+// Use routes
+app.use("/opDetails", opDetailsRoutes);
+app.use("/auth", authRoutes);
+app.use("/guard", SecurityGuardRoutes);
 
 // Start the server
 const PORT = process.env.PORT || 3030;
