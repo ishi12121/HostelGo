@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import  { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAccessToken, clearTokens } from "../utils/tokenManager";
 import axios from "axios";
@@ -29,9 +29,8 @@ import PendingIcon from "@mui/icons-material/Pending";
 import {
   Event as EventIcon,
   Schedule as ScheduleIcon,
-  LocationCity as LocationCityIcon,
+  
   Description as DescriptionIcon,
-  Person as PersonIcon,
 } from "@mui/icons-material";
 import { baseURL } from "../context/ApiInterceptor";
 
@@ -61,7 +60,7 @@ const StyledCard = styled(Card)(({ theme }) => ({
   },
 }));
 
-const StyledChip = styled(Chip)(({ theme, color }) => ({
+const StyledChip = styled(Chip)(() => ({
   fontWeight: "bold",
 }));
 
@@ -81,11 +80,18 @@ const Staff = () => {
   }, [navigate]);
 
   const fetchOpDetails = () => {
+    const token = getAccessToken();
     axios
       .get(
         `${baseURL}/opDetails/staff/${localStorage.getItem(
           "userId"
-        )}`
+        )}`,
+        {
+          headers: {
+            "x-auth-token": token,
+            },
+            }
+
       )
       .then((response) => {
         setOpDetails(response.data?.data || []);
@@ -112,9 +118,16 @@ const Staff = () => {
   };
 
   const handleAccept = () => {
+    const token = getAccessToken();
     axios
-      .post(`${baseURL}/opDetails/accept`, {
+      .post(`${baseURL}/opDetails/accept`,
+        
+         {
         id: selectedRequest._id,
+      },{
+        headers:{
+          "x-auth-token": token,
+        }
       })
       .then(() => {
         fetchOpDetails();
@@ -126,9 +139,16 @@ const Staff = () => {
   };
 
   const handleReject = () => {
+    const token = getAccessToken();
     axios
-      .post(`${baseURL}/opDetails/reject`, {
+      .post(`${baseURL}/opDetails/reject`,
+   
+         {
         id: selectedRequest._id,
+      },     {
+        headers:{
+          "x-auth-token": token,
+          }
       })
       .then(() => {
         fetchOpDetails();

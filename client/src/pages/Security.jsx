@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import ReusableTable from "../components/ReusableTable";
 import LargeToast from "../components/LargeToast";
 import {
@@ -19,7 +19,7 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
 import CloseIcon from "@mui/icons-material/Close";
 import { useNavigate } from "react-router-dom";
-import { clearTokens } from "../utils/tokenManager";
+import { clearTokens, getAccessToken } from "../utils/tokenManager";
 import axios from "axios";
 import { baseURL } from "../context/ApiInterceptor";
 
@@ -48,7 +48,14 @@ const Security = () => {
 
   const fetchGuardRegister = async () => {
     try {
-      const response = await axios.get(`${baseURL}/guard/All`);
+      const token = getAccessToken();
+      const response = await axios.get(`${baseURL}/guard/All`,
+        {
+          headers: {
+            "x-auth-token":token
+          }
+        }
+      );
       setGuardRegister(response.data.data);
     } catch (error) {
       console.error("Error fetching guard register:", error);
@@ -60,8 +67,14 @@ const Security = () => {
       setQrData(result.text);
       setIsVerifying(true);
       try {
+        const token = getAccessToken();
         const response = await axios.get(
-          `${baseURL}/opDetails/verifyOutpass/${result.text}`
+          `${baseURL}/opDetails/verifyOutpass/${result.text}`,
+          {
+headers:{
+  "x-auth-token":token
+}
+          }
         );
         setVerificationResult(response.data.data);
       } catch (error) {
@@ -76,8 +89,15 @@ const Security = () => {
   const handleApprove = async () => {
     if (verificationResult && verificationResult._id) {
       try {
+        const token = getAccessToken();
         await axios.post(
-          `${baseURL}/guard/registerDetails/${verificationResult._id}`
+          `${baseURL}/guard/registerDetails/${verificationResult._id}`,{},
+          {
+            headers:{
+              "x-auth-token":token
+            }
+          }
+
         );
         setIsScanning(false);
         setQrData(null);
