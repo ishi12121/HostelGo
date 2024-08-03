@@ -115,3 +115,47 @@ export const GetAllStaff = asyncHandler(async (req, res) => {
   const staff = await Staff.find();
   res.status(200).json({ status: "success", data: staff });
 });
+
+export const refreshToken = asyncHandler(async (req, res) => {
+  const refreshToken = req.cookies.refreshToken || req.header('Refresh-Token');
+
+  if (!refreshToken) {
+    return res.status(401).json({ status: 'error', message: 'Refresh token not found' });
+  }
+
+  try {
+    const decoded = jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET);
+    const { email, role } = decoded;
+
+    const model = role === 'staff' ? Staff : role === 'security' ? Security : User;
+    const user = await model.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ status: 'error', message: 'User not found' });
+    }
+
+    const accessToken = jwt.sign(
+      { email: user.email, role: user.role },
+      process.env.ACCESS_TOKEN_SECRET,
+      { expiresIn: '120m' }
+    );
+
+    const newRefreshToken = jwt.sign(
+      { email: user.email, role: user.role },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    res.cookie('accessToken', accessToken, { httpOnly: true });
+    res.cookie('refreshToken', newRefreshToken, { httpOnly: true });
+
+    res.status(200).json({
+      status: 'success',
+      message: 'Token refreshed successfully',
+      accessToken,
+      refreshToken: newRefreshToken,
+    });
+  } catch (error) {
+    return res.status(403).json({ status: 'error', message: 'Invalid refresh token' });
+  }
+});

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import QRCode from "qrcode.react";
 import {
   Container,
@@ -125,17 +125,27 @@ const Student = () => {
 
   const fetchStaffList = async () => {
     try {
-      const response = await axios.get(`${baseURL}/auth/getStaff`);
+      const token = getAccessToken(); 
+      const response = await axios.get(`${baseURL}/auth/getStaff`, {
+        headers: {
+          "x-auth-token": token
+        }
+      });
       setStaffList(response.data.data);
     } catch (error) {
       console.error("Error fetching staff list:", error);
     }
   };
-
+  
   const fetchDetails = async () => {
     try {
+      const token  = getAccessToken();
       const response = await axios.get(
-        `${baseURL}/opDetails/user/${getUserId()}`
+        `${baseURL}/opDetails/user/${getUserId()}`,{
+          headers: {
+              'x-auth-token':token    
+          }
+        }
       );
       setUserOpDetails(response.data.data);
     } catch (error) {
@@ -145,11 +155,16 @@ const Student = () => {
 
   const onSubmit = async (data) => {
     try {
+      const token = getAccessToken();
       const finalData = {
         ...data,
         userId: getUserId(),
       };
-      await axios.post(`${baseURL}/opDetails`, finalData);
+      await axios.post(`${baseURL}/opDetails`, finalData,{
+        headers: {
+          "x-auth-token":token
+          }
+      });
       showToast("success", "Details submitted successfully!");
       fetchDetails();
       reset();
@@ -161,10 +176,13 @@ const Student = () => {
 
   const assignToStaff = async () => {
     try {
+      const token = getAccessToken();
       await axios.post(`${baseURL}/opDetails/assign`, {
         id: selectedOpDetail._id,
         staffId: selectedStaff,
-      });
+      },{headers:{
+        "x-auth-token":token
+      }});
       showToast("success", "Assigned to Warden successfully!");
       fetchDetails();
       setAssignModalOpen(false);

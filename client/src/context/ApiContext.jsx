@@ -1,11 +1,13 @@
 // src/context/ApiContext.js
-import React, { createContext, useState, useContext, useCallback } from 'react';
+import  { createContext, useState, useContext, useCallback } from 'react';
 import axios from 'axios';
 
 const ApiContext = createContext();
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useApi = () => useContext(ApiContext);
 
+// eslint-disable-next-line react/prop-types
 export const ApiProvider = ({ children }) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);

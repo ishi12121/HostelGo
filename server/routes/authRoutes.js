@@ -1,6 +1,7 @@
 import express from "express";
 import * as yup from "yup";
 import * as authController from "../controllers/authController.js";
+import { verifyToken } from "../middleware/authmiddleware.js";
 
 const router = express.Router();
 
@@ -55,6 +56,7 @@ router.post(
   authController.registerSecurity
 );
 router.post("/login", validateRequest(loginSchema), authController.login);
-router.get("/getStaff", authController.GetAllStaff);
+router.get("/getStaff",verifyToken ,authController.GetAllStaff);
+router.post("/refresh",authController.refreshToken)
 
 export default router;
