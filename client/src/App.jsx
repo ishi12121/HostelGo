@@ -1,24 +1,23 @@
-import React, { useEffect } from "react";
+import { Container } from "@mui/material";
+import  { useEffect } from "react";
 import {
+  Navigate,
+  Route,
   BrowserRouter as Router,
   Routes,
-  Route,
-  Navigate,
-  useNavigate,
   useLocation,
+  useNavigate,
 } from "react-router-dom";
-import { AppProvider } from "./context/AppContext";
-import About from "./pages/About";
-import Login from "./pages/Login";
-import ErrorPage from "./pages/ErrorPage";
-import { Container } from "@mui/material";
 import "./App.css";
 import { ApiProvider } from "./context/ApiContext";
+import { AppProvider } from "./context/AppContext";
+import About from "./pages/About";
+import ErrorPage from "./pages/ErrorPage";
+import Login from "./pages/Login";
 import Register from "./pages/Register";
-import ProtectedRoute from "./components/ProtectedRoute";
-import Student from "./pages/Student";
-import Staff from "./pages/Staff";
 import Security from "./pages/Security";
+import Staff from "./pages/Staff";
+import Student from "./pages/Student";
 
 function App() {
   return (

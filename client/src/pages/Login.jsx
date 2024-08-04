@@ -1,27 +1,28 @@
-import React, { useCallback, useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import {
-  TextField,
-  Button,
-  Container,
-  Typography,
-  Box,
-  Paper,
-  ThemeProvider,
-  createTheme,
-} from "@mui/material";
-import { styled, keyframes } from "@mui/system";
-import Modal from "@mui/material/Modal";
-import axios from "axios";
-import * as yup from "yup";
+/* eslint-disable react/no-unescaped-entities */
 import { yupResolver } from "@hookform/resolvers/yup";
-import useToast from "../hooks/useToast";
-import Toast from "../components/Toast";
-import { Link, useNavigate } from "react-router-dom";
-import { setTokens, getAccessToken } from "../utils/tokenManager";
 import SchoolIcon from "@mui/icons-material/School";
 import WorkIcon from "@mui/icons-material/Work";
+import {
+  Box,
+  Button,
+  Container,
+  Paper,
+  TextField,
+  ThemeProvider,
+  Typography,
+  createTheme,
+} from "@mui/material";
+import Modal from "@mui/material/Modal";
+import { keyframes, styled } from "@mui/system";
+import axios from "axios";
+import  { useCallback, useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { Link, useNavigate } from "react-router-dom";
+import * as yup from "yup";
+import Toast from "../components/Toast";
 import { baseURL } from "../context/ApiInterceptor";
+import useToast from "../hooks/useToast";
+import { setTokens } from "../utils/tokenManager";
 
 // Validation schema
 const schema = yup.object().shape({
@@ -166,7 +167,7 @@ const LoginForm = () => {
       navigate("/login");
     }
     setResponse(false);
-  }, [response]);
+  }, [navigate, response]);
 
   const onSubmit = async (data) => {
     try {
@@ -313,6 +314,7 @@ const LoginForm = () => {
             </StyledButton>
           </StyledForm>
           <Typography variant="body2" style={{ marginTop: "1rem" }}>
+          
             Don't have an account? <Link to="/register">Register here</Link>
           </Typography>
           <Typography

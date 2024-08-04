@@ -1,5 +1,4 @@
-// src/pages/ErrorPage.js
-import React from 'react';
+
 import { Container, Typography } from '@mui/material';
 
 const ErrorPage = () => {
