@@ -26,6 +26,37 @@ import { useToast } from "@/components/ui/use-toast";
 import { baseURL } from "@/context/ApiInterceptor";
 import { Moon, Sun, School, Briefcase, ShieldCheck } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import studentAnimation from "../components/lottie-files/student.json";
+import wardenAnimation from "../components/lottie-files/warden.json";
+import securityAnimation from "../components/lottie-files/security.json";
+import Lottie from "react-lottie";
+
+const studentOptions = {
+  loop: true,
+  autoplay: true,
+  animationData: studentAnimation,
+  rendererSettings: {
+    preserveAspectRatio: "xMidYMid slice",
+  },
+};
+
+const wardenOptions = {
+  loop: true,
+  autoplay: true,
+  animationData: wardenAnimation,
+  rendererSettings: {
+    preserveAspectRatio: "xMidYMid slice",
+  },
+};
+
+const securityOptions = {
+  loop: true,
+  autoplay: true,
+  animationData: securityAnimation,
+  rendererSettings: {
+    preserveAspectRatio: "xMidYMid slice",
+  },
+};
 
 const schema = yup.object().shape({
   role: yup.string().required("Role is required"),
@@ -60,8 +91,6 @@ const RegisterForm: React.FC = () => {
       password: "",
     },
   });
-
-  const role = watch("role");
 
   const onSubmit = async (data: FormData) => {
     try {
@@ -156,13 +185,13 @@ const RegisterForm: React.FC = () => {
                 <TabsTrigger value="security">Security</TabsTrigger>
               </TabsList>
               <TabsContent value="student">
-                <School className="h-12 w-12 mx-auto mt-4 mb-2 text-primary" />
+                <Lottie options={studentOptions} height={120} width={120} />
               </TabsContent>
               <TabsContent value="staff">
-                <Briefcase className="h-12 w-12 mx-auto mt-4 mb-2 text-primary" />
+                <Lottie options={wardenOptions} height={120} width={120} />
               </TabsContent>
               <TabsContent value="security">
-                <ShieldCheck className="h-12 w-12 mx-auto mt-4 mb-2 text-primary" />
+                <Lottie options={securityOptions} height={120} width={120} />
               </TabsContent>
             </Tabs>
             <div className="space-y-2">
