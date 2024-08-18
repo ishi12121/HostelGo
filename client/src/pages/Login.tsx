@@ -13,8 +13,8 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
-import { Icons } from "@/components/ui/Icons";
 import {
   Dialog,
   DialogContent,
@@ -25,9 +25,9 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { setTokens } from "@/utils/tokenManager";
 import { baseURL } from "@/context/ApiInterceptor";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Sun, School, Briefcase, ShieldCheck } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Validation schema
 const schema = yup.object().shape({
   role: yup.string().required("Role is required"),
   email: yup.string().email("Invalid email").required("Email is required"),
@@ -40,7 +40,6 @@ const LoginForm: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const [selectedRole, setSelectedRole] = useState<string>("");
   const [securityModalOpen, setSecurityModalOpen] = useState(false);
   const [tapCount, setTapCount] = useState(0);
   const [darkMode, setDarkMode] = useState(false);
@@ -54,7 +53,7 @@ const LoginForm: React.FC = () => {
   } = useForm<FormData>({
     resolver: yupResolver(schema),
     defaultValues: {
-      role: "",
+      role: "student",
       email: "",
       password: "",
     },
@@ -65,8 +64,6 @@ const LoginForm: React.FC = () => {
   const onSubmit = async (data: FormData) => {
     try {
       const url = `${baseURL}/auth/login`;
-      console.log("Sending request to:", url);
-      console.log("Request payload:", data);
       const response = await axios.post(url, data);
       const { accessToken, refreshToken, role, userId } = response.data;
       localStorage.setItem("role", role);
@@ -79,10 +76,6 @@ const LoginForm: React.FC = () => {
       navigateBasedOnRole(role);
     } catch (error) {
       console.error("Login error:", error);
-      if (axios.isAxiosError(error)) {
-        console.error("Response data:", error.response?.data);
-        console.error("Response status:", error.response?.status);
-      }
       toast({
         title: "Error",
         description: "Login failed. Please try again.",
@@ -105,11 +98,6 @@ const LoginForm: React.FC = () => {
       default:
         navigate("/");
     }
-  };
-
-  const handleRoleSelection = (role: string) => {
-    setValue("role", role);
-    setSelectedRole(role);
   };
 
   const handleCopyrightClick = useCallback(() => {
@@ -139,9 +127,7 @@ const LoginForm: React.FC = () => {
   }, [darkMode]);
 
   return (
-    <div
-      className={`min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 transition-colors duration-200`}
-    >
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 transition-colors duration-200 p-4">
       <Card className="w-full max-w-md shadow-lg dark:bg-gray-800">
         <CardHeader className="space-y-1">
           <div className="flex justify-between items-center">
@@ -153,61 +139,45 @@ const LoginForm: React.FC = () => {
               className="ml-auto"
             >
               {darkMode ? (
-                <Sun className="h-6 w-6" />
+                <Sun className="h-5 w-5" />
               ) : (
-                <Moon className="h-6 w-6" />
+                <Moon className="h-5 w-5" />
               )}
             </Button>
           </div>
-          <CardDescription className="text-center">
-            Please log in to continue
-          </CardDescription>
+          <CardDescription>Please log in to continue</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="flex justify-around mb-4">
-              <Button
-                type="button"
-                variant={role === "student" ? "default" : "outline"}
-                className={`flex flex-col items-center transition-all duration-200 ${
-                  role === "student" ? "bg-primary text-primary-foreground" : ""
-                }`}
-                onClick={() => handleRoleSelection("student")}
-              >
-                <Icons.school className="h-6 w-6 mb-2" />
-                Student
-              </Button>
-              <Button
-                type="button"
-                variant={role === "staff" ? "default" : "outline"}
-                className={`flex flex-col items-center transition-all duration-200 ${
-                  role === "staff" ? "bg-primary text-primary-foreground" : ""
-                }`}
-                onClick={() => handleRoleSelection("staff")}
-              >
-                <Icons.work className="h-6 w-6 mb-2" />
-                Warden
-              </Button>
-            </div>
-            {errors.role && (
-              <p className="text-sm text-red-500 dark:text-red-400">
-                {errors.role.message}
-              </p>
-            )}
+            <Tabs
+              defaultValue="student"
+              onValueChange={(value) => setValue("role", value)}
+            >
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="student">Student</TabsTrigger>
+                <TabsTrigger value="staff">Warden</TabsTrigger>
+                <TabsTrigger value="security">Security</TabsTrigger>
+              </TabsList>
+              <TabsContent value="student">
+                <School className="h-12 w-12 mx-auto mt-4 mb-2 text-primary" />
+              </TabsContent>
+              <TabsContent value="staff">
+                <Briefcase className="h-12 w-12 mx-auto mt-4 mb-2 text-primary" />
+              </TabsContent>
+              <TabsContent value="security">
+                <ShieldCheck className="h-12 w-12 mx-auto mt-4 mb-2 text-primary" />
+              </TabsContent>
+            </Tabs>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 {...register("email")}
-                className={`${
-                  errors.email ? "border-red-500" : ""
-                } dark:bg-gray-700 dark:text-white`}
+                className={errors.email ? "border-red-500" : ""}
               />
               {errors.email && (
-                <p className="text-sm text-red-500 dark:text-red-400">
-                  {errors.email.message}
-                </p>
+                <p className="text-sm text-red-500">{errors.email.message}</p>
               )}
             </div>
             <div className="space-y-2">
@@ -216,12 +186,10 @@ const LoginForm: React.FC = () => {
                 id="password"
                 type="password"
                 {...register("password")}
-                className={`${
-                  errors.password ? "border-red-500" : ""
-                } dark:bg-gray-700 dark:text-white`}
+                className={errors.password ? "border-red-500" : ""}
               />
               {errors.password && (
-                <p className="text-sm text-red-500 dark:text-red-400">
+                <p className="text-sm text-red-500">
                   {errors.password.message}
                 </p>
               )}
@@ -230,23 +198,25 @@ const LoginForm: React.FC = () => {
               Log In
             </Button>
           </form>
-          <p className="text-sm text-center mt-4 dark:text-gray-300">
+        </CardContent>
+        <CardFooter className="flex flex-col space-y-2">
+          <p className="text-sm text-center">
             Don't have an account?{" "}
             <Link to="/register" className="text-primary hover:underline">
               Register here
             </Link>
           </p>
           <p
-            className="text-xs text-center mt-4 opacity-70 cursor-pointer dark:text-gray-400"
+            className="text-xs text-center opacity-70 cursor-pointer"
             onClick={handleCopyrightClick}
           >
             HostelGo © 2024
           </p>
-        </CardContent>
+        </CardFooter>
       </Card>
 
       <Dialog open={securityModalOpen} onOpenChange={setSecurityModalOpen}>
-        <DialogContent className="dark:bg-gray-800">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Security Login</DialogTitle>
             <DialogDescription>
@@ -260,14 +230,10 @@ const LoginForm: React.FC = () => {
                 id="security-email"
                 type="email"
                 {...register("email")}
-                className={`${
-                  errors.email ? "border-red-500" : ""
-                } dark:bg-gray-700 dark:text-white`}
+                className={errors.email ? "border-red-500" : ""}
               />
               {errors.email && (
-                <p className="text-sm text-red-500 dark:text-red-400">
-                  {errors.email.message}
-                </p>
+                <p className="text-sm text-red-500">{errors.email.message}</p>
               )}
             </div>
             <div className="space-y-2">
@@ -276,12 +242,10 @@ const LoginForm: React.FC = () => {
                 id="security-password"
                 type="password"
                 {...register("password")}
-                className={`${
-                  errors.password ? "border-red-500" : ""
-                } dark:bg-gray-700 dark:text-white`}
+                className={errors.password ? "border-red-500" : ""}
               />
               {errors.password && (
-                <p className="text-sm text-red-500 dark:text-red-400">
+                <p className="text-sm text-red-500">
                   {errors.password.message}
                 </p>
               )}

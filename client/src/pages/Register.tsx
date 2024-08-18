@@ -13,6 +13,7 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import {
   Dialog,
@@ -23,13 +24,16 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { baseURL } from "@/context/ApiInterceptor";
-import { Moon, Sun, School, Briefcase } from "lucide-react";
+import { Moon, Sun, School, Briefcase, ShieldCheck } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Validation schema
 const schema = yup.object().shape({
   role: yup.string().required("Role is required"),
   email: yup.string().email("Invalid email").required("Email is required"),
-  password: yup.string().required("Password is required"),
+  password: yup
+    .string()
+    .required("Password is required")
+    .min(8, "Password must be at least 8 characters"),
 });
 
 type FormData = yup.InferType<typeof schema>;
@@ -38,7 +42,6 @@ const RegisterForm: React.FC = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  const [selectedRole, setSelectedRole] = useState<string>("");
   const [securityModalOpen, setSecurityModalOpen] = useState(false);
   const [tapCount, setTapCount] = useState(0);
   const [darkMode, setDarkMode] = useState(false);
@@ -52,7 +55,7 @@ const RegisterForm: React.FC = () => {
   } = useForm<FormData>({
     resolver: yupResolver(schema),
     defaultValues: {
-      role: "",
+      role: "student",
       email: "",
       password: "",
     },
@@ -92,11 +95,6 @@ const RegisterForm: React.FC = () => {
     }
   };
 
-  const handleRoleSelection = (role: string) => {
-    setValue("role", role);
-    setSelectedRole(role);
-  };
-
   const handleCopyrightClick = useCallback(() => {
     setTapCount((prevCount) => {
       const newCount = prevCount + 1;
@@ -124,9 +122,7 @@ const RegisterForm: React.FC = () => {
   }, [darkMode]);
 
   return (
-    <div
-      className={`min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 transition-colors duration-200`}
-    >
+    <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900 transition-colors duration-200 p-4">
       <Card className="w-full max-w-md shadow-lg dark:bg-gray-800">
         <CardHeader className="space-y-1">
           <div className="flex justify-between items-center">
@@ -138,61 +134,47 @@ const RegisterForm: React.FC = () => {
               className="ml-auto"
             >
               {darkMode ? (
-                <Sun className="h-6 w-6" />
+                <Sun className="h-5 w-5" />
               ) : (
-                <Moon className="h-6 w-6" />
+                <Moon className="h-5 w-5" />
               )}
             </Button>
           </div>
-          <CardDescription className="text-center">
+          <CardDescription>
             Please fill in the details to register
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div className="flex justify-around mb-4">
-              <Button
-                type="button"
-                variant={role === "student" ? "default" : "outline"}
-                className={`flex flex-col items-center transition-all duration-200 ${
-                  role === "student" ? "bg-primary text-primary-foreground" : ""
-                }`}
-                onClick={() => handleRoleSelection("student")}
-              >
-                <School className="h-6 w-6 mb-2" />
-                Student
-              </Button>
-              <Button
-                type="button"
-                variant={role === "staff" ? "default" : "outline"}
-                className={`flex flex-col items-center transition-all duration-200 ${
-                  role === "staff" ? "bg-primary text-primary-foreground" : ""
-                }`}
-                onClick={() => handleRoleSelection("staff")}
-              >
-                <Briefcase className="h-6 w-6 mb-2" />
-                Warden
-              </Button>
-            </div>
-            {errors.role && (
-              <p className="text-sm text-red-500 dark:text-red-400">
-                {errors.role.message}
-              </p>
-            )}
+            <Tabs
+              defaultValue="student"
+              onValueChange={(value) => setValue("role", value)}
+            >
+              <TabsList className="grid w-full grid-cols-3">
+                <TabsTrigger value="student">Student</TabsTrigger>
+                <TabsTrigger value="staff">Warden</TabsTrigger>
+                <TabsTrigger value="security">Security</TabsTrigger>
+              </TabsList>
+              <TabsContent value="student">
+                <School className="h-12 w-12 mx-auto mt-4 mb-2 text-primary" />
+              </TabsContent>
+              <TabsContent value="staff">
+                <Briefcase className="h-12 w-12 mx-auto mt-4 mb-2 text-primary" />
+              </TabsContent>
+              <TabsContent value="security">
+                <ShieldCheck className="h-12 w-12 mx-auto mt-4 mb-2 text-primary" />
+              </TabsContent>
+            </Tabs>
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
                 type="email"
                 {...register("email")}
-                className={`${
-                  errors.email ? "border-red-500" : ""
-                } dark:bg-gray-700 dark:text-white`}
+                className={errors.email ? "border-red-500" : ""}
               />
               {errors.email && (
-                <p className="text-sm text-red-500 dark:text-red-400">
-                  {errors.email.message}
-                </p>
+                <p className="text-sm text-red-500">{errors.email.message}</p>
               )}
             </div>
             <div className="space-y-2">
@@ -201,12 +183,10 @@ const RegisterForm: React.FC = () => {
                 id="password"
                 type="password"
                 {...register("password")}
-                className={`${
-                  errors.password ? "border-red-500" : ""
-                } dark:bg-gray-700 dark:text-white`}
+                className={errors.password ? "border-red-500" : ""}
               />
               {errors.password && (
-                <p className="text-sm text-red-500 dark:text-red-400">
+                <p className="text-sm text-red-500">
                   {errors.password.message}
                 </p>
               )}
@@ -215,23 +195,25 @@ const RegisterForm: React.FC = () => {
               Register
             </Button>
           </form>
-          <p className="text-sm text-center mt-4 dark:text-gray-300">
+        </CardContent>
+        <CardFooter className="flex flex-col space-y-2">
+          <p className="text-sm text-center">
             Already have an account?{" "}
             <Link to="/login" className="text-primary hover:underline">
               Login here
             </Link>
           </p>
           <p
-            className="text-xs text-center mt-4 opacity-70 cursor-pointer dark:text-gray-400"
+            className="text-xs text-center opacity-70 cursor-pointer"
             onClick={handleCopyrightClick}
           >
             HostelGo © 2024
           </p>
-        </CardContent>
+        </CardFooter>
       </Card>
 
       <Dialog open={securityModalOpen} onOpenChange={setSecurityModalOpen}>
-        <DialogContent className="dark:bg-gray-800">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Security Guard Registration</DialogTitle>
             <DialogDescription>
@@ -245,14 +227,10 @@ const RegisterForm: React.FC = () => {
                 id="security-email"
                 type="email"
                 {...register("email")}
-                className={`${
-                  errors.email ? "border-red-500" : ""
-                } dark:bg-gray-700 dark:text-white`}
+                className={errors.email ? "border-red-500" : ""}
               />
               {errors.email && (
-                <p className="text-sm text-red-500 dark:text-red-400">
-                  {errors.email.message}
-                </p>
+                <p className="text-sm text-red-500">{errors.email.message}</p>
               )}
             </div>
             <div className="space-y-2">
@@ -261,12 +239,10 @@ const RegisterForm: React.FC = () => {
                 id="security-password"
                 type="password"
                 {...register("password")}
-                className={`${
-                  errors.password ? "border-red-500" : ""
-                } dark:bg-gray-700 dark:text-white`}
+                className={errors.password ? "border-red-500" : ""}
               />
               {errors.password && (
-                <p className="text-sm text-red-500 dark:text-red-400">
+                <p className="text-sm text-red-500">
                   {errors.password.message}
                 </p>
               )}

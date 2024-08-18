@@ -45,22 +45,7 @@ import {
 // Import your utility functions and custom hooks
 import { clearTokens, getAccessToken, getUserId } from "@/utils/tokenManager";
 import { baseURL } from "@/context/ApiInterceptor";
-
-// Define your schema
-const schema = yup.object().shape({
-  name: yup.string().required("Name is required"),
-  department: yup.string().required("Department is required"),
-  rollno: yup.string().required("Roll Number is required"),
-  year: yup.string().required("Year is required"),
-  dateFrom: yup.date().required("Date From is required"),
-  dateTo: yup.date().required("Date To is required"),
-  timeFrom: yup.string().required("Time From is required"),
-  timeTo: yup.string().required("Time To is required"),
-  phNo: yup.string().required("Phone Number is required"),
-  parentPhNo: yup.string().required("Parent Phone Number is required"),
-  reason: yup.string().required("Reason is required"),
-  city: yup.string().required("City is required"),
-});
+import { schema } from "./FormData";
 
 // Define your interfaces
 interface StaffMember {
@@ -105,7 +90,7 @@ const Student: React.FC = () => {
   } = useForm({
     resolver: yupResolver(schema),
   });
-
+  console.log(errors);
   useEffect(() => {
     if (!getAccessToken()) {
       navigate("/login");
@@ -346,152 +331,127 @@ const Student: React.FC = () => {
         </div>
       </main>
 
-      {/* New OP Form Modal */}
+      {/* New Form Modal */}
       <Dialog open={formModalOpen} onOpenChange={setFormModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>New OP Form</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="name" className="text-right">
-                  Name
-                </Label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="name">Name</Label>
                 <Input
                   id="name"
-                  className="col-span-3"
+                  placeholder="Student Name"
                   {...register("name")}
                   error={errors.name?.message}
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="department" className="text-right">
-                  Department
-                </Label>
+              <div>
+                <Label htmlFor="department">Department</Label>
                 <Input
                   id="department"
-                  className="col-span-3"
+                  placeholder="Department"
                   {...register("department")}
                   error={errors.department?.message}
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="rollno" className="text-right">
-                  Roll Number
-                </Label>
+              <div>
+                <Label htmlFor="rollno">Roll Number</Label>
                 <Input
                   id="rollno"
-                  className="col-span-3"
+                  placeholder="Roll Number"
                   {...register("rollno")}
                   error={errors.rollno?.message}
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="year" className="text-right">
-                  Year
-                </Label>
+              <div>
+                <Label htmlFor="dateFrom">From Date</Label>
                 <Input
-                  id="year"
-                  className="col-span-3"
-                  {...register("year")}
-                  error={errors.year?.message}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="dateFrom" className="text-right">
-                  Date From
-                </Label>
-                <Input
-                  id="dateFrom"
                   type="date"
-                  className="col-span-3"
+                  id="dateFrom"
                   {...register("dateFrom")}
                   error={errors.dateFrom?.message}
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="dateTo" className="text-right">
-                  Date To
-                </Label>
+              <div>
+                <Label htmlFor="dateTo">To Date</Label>
                 <Input
-                  id="dateTo"
                   type="date"
-                  className="col-span-3"
+                  id="dateTo"
                   {...register("dateTo")}
                   error={errors.dateTo?.message}
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="timeFrom" className="text-right">
-                  Time From
-                </Label>
+              <div>
+                <Label htmlFor="timeFrom">From Time</Label>
                 <Input
-                  id="timeFrom"
                   type="time"
-                  className="col-span-3"
+                  id="timeFrom"
                   {...register("timeFrom")}
                   error={errors.timeFrom?.message}
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="timeTo" className="text-right">
-                  Time To
-                </Label>
+              <div>
+                <Label htmlFor="timeTo">To Time</Label>
                 <Input
-                  id="timeTo"
                   type="time"
-                  className="col-span-3"
+                  id="timeTo"
                   {...register("timeTo")}
                   error={errors.timeTo?.message}
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="phNo" className="text-right">
-                  Phone Number
-                </Label>
-                <Input
-                  id="phNo"
-                  className="col-span-3"
-                  {...register("phNo")}
-                  error={errors.phNo?.message}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="parentPhNo" className="text-right">
-                  Parent Phone
-                </Label>
-                <Input
-                  id="parentPhNo"
-                  className="col-span-3"
-                  {...register("parentPhNo")}
-                  error={errors.parentPhNo?.message}
-                />
-              </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="city" className="text-right">
-                  City
-                </Label>
+              <div>
+                <Label htmlFor="city">City</Label>
                 <Input
                   id="city"
-                  className="col-span-3"
+                  placeholder="City"
                   {...register("city")}
                   error={errors.city?.message}
                 />
               </div>
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="reason" className="text-right">
-                  Reason
-                </Label>
+              <div>
+                <Label htmlFor="year">Year</Label>
+                <Input
+                  id="year"
+                  placeholder="Year"
+                  {...register("year")}
+                  error={errors.year?.message}
+                />
+              </div>
+              <div>
+                <Label htmlFor="phNo">Phone Number</Label>
+                <Input
+                  id="phNo"
+                  placeholder="Phone Number"
+                  {...register("phNo")}
+                  error={errors.phNo?.message}
+                />
+              </div>
+              <div>
+                <Label htmlFor="parentPhNo">Parent Phone Number</Label>
+                <Input
+                  id="parentPhNo"
+                  placeholder="Parent Phone Number"
+                  {...register("parentPhNo")}
+                  error={errors.parentPhNo?.message}
+                />
+              </div>
+              <div className="md:col-span-2">
+                <Label htmlFor="reason">Reason</Label>
                 <Textarea
                   id="reason"
-                  className="col-span-3"
+                  placeholder="Reason"
                   {...register("reason")}
                   error={errors.reason?.message}
                 />
               </div>
             </div>
-            <DialogFooter>
+            <DialogFooter className="mt-4">
+              <Button variant="outline" onClick={() => setFormModalOpen(false)}>
+                Cancel
+              </Button>
               <Button type="submit">Submit</Button>
             </DialogFooter>
           </form>
