@@ -34,6 +34,9 @@ Contributions are welcome! If you would like to contribute to HostelGo, please f
 4. Push to the branch: `git push origin feature/your-feature`
 5. Submit a pull request
 
+## Running the project locally 
+
+1. Use yarn to run SERVER and pnpm to run CLIENT.
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
