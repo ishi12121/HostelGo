@@ -30,7 +30,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import studentAnimation from "../components/lottie-files/student.json";
 import wardenAnimation from "../components/lottie-files/warden.json";
 import securityAnimation from "../components/lottie-files/security.json";
-
+import Lottie from "react-lottie";
 const studentOptions = {
   loop: true,
   autoplay: true,
@@ -58,7 +58,6 @@ const securityOptions = {
   },
 };
 
-import Lottie from "react-lottie";
 const schema = yup.object().shape({
   role: yup.string().required("Role is required"),
   email: yup.string().email("Invalid email").required("Email is required"),

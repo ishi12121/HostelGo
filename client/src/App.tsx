@@ -7,7 +7,6 @@ import {
   useNavigate,
   useLocation,
 } from "react-router-dom";
-
 import About from "./pages/About";
 import Login from "./pages/Login";
 import ErrorPage from "./pages/ErrorPage";
@@ -15,10 +14,12 @@ import Register from "./pages/Register";
 import Student from "./pages/Student";
 import Staff from "./pages/Staff";
 import Security from "./pages/Security";
+import LoadingScreen from "./components/LoadingScreen";
 
 function App() {
   return (
     <Router>
+      <LoadingScreen />
       <Main />
     </Router>
   );
