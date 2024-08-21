@@ -1,2 +1,2 @@
-export const baseURL = process.env.REACT_APP_BASE_URL?.toString();
-console.log(baseURL);
+export const envURL = process.env.REACT_APP_BASE_URL;
+export const baseURL = envURL?.toString();
