@@ -10,11 +10,14 @@ const ErrorAnimationOptions = {
     preserveAspectRatio: "xMidYMid slice",
   },
 };
+
 const ErrorPage = () => {
   return (
-    <>
-      <Lottie options={ErrorAnimationOptions} height={600} width={800} />
-    </>
+    <div className="flex justify-center items-center h-screen">
+      <div className="sm:h-[500px] sm:w-[600px] md:h-[600px] md:w-[800px]">
+        <Lottie options={ErrorAnimationOptions} height={400} width={500} />
+      </div>
+    </div>
   );
 };
 

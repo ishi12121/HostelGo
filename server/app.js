@@ -6,7 +6,6 @@ import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 
-// Load environment variables from .env file
 dotenv.config();
 
 const app = express();
@@ -16,22 +15,19 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 const corsOptions = {
-  origin: process.env.CORS_URL,
+  origin: "*",
 };
 
 app.use(cors(corsOptions));
 
-// Custom token to log request body
 morgan.token("body", (req) => {
   return JSON.stringify(req.body);
 });
 
-// Custom token to log cookies
 morgan.token("cookies", (req) => {
   return JSON.stringify(req.cookies);
 });
 
-// Custom Morgan for logging
 app.use(
   morgan((tokens, req, res) => {
     return [
@@ -43,8 +39,8 @@ app.use(
       `IP: ${tokens["remote-addr"](req, res)}`,
       `User-Agent: ${tokens["user-agent"](req, res)}`,
       `Timestamp: ${new Date().toISOString()}`,
-      `Payload: ${tokens.body(req, res)}`, // Log the request body
-      `Cookies: ${tokens.cookies(req, res)}`, // Log the cookies
+      `Payload: ${tokens.body(req, res)}`,
+      `Cookies: ${tokens.cookies(req, res)}`,
     ].join(" | ");
   })
 );
@@ -63,16 +59,14 @@ async function checkConnection() {
 
 checkConnection();
 
-// Import routes
 import opDetailsRoutes from "./routes/opDetailsRoutes.js";
 import authRoutes from "./routes/authRoutes.js";
 import SecurityGuardRoutes from "./routes/SecurityGuardRoutes.js";
-// Use routes
+
 app.use("/opDetails", opDetailsRoutes);
 app.use("/auth", authRoutes);
 app.use("/guard", SecurityGuardRoutes);
 
-// Start the server
 const PORT = process.env.PORT || 3030;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

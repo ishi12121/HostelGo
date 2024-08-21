@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Progress } from "../components/ui/progress";
 import Lottie from "react-lottie";
-import animationData from "./lottie-files/Animation - 1724175702643.json";
+import animationData from "./lottie-files/BounceLoader.json";
 
 const LoadingScreen: React.FC = () => {
   const [progress, setProgress] = useState(0);
@@ -31,11 +31,15 @@ const LoadingScreen: React.FC = () => {
 
   return (
     <div
-      className="fixed top-0 left-0 w-full h-full bg-white flex flex-col items-center justify-center z-50"
-      style={{ display: progress < 100 ? "flex" : "none" }}
+      className={`fixed top-0 left-0 w-full h-full bg-white flex flex-col items-center justify-center z-50 ${
+        progress < 100 ? "flex" : "hidden"
+      }`}
     >
-      <Lottie options={options} height={200} width={200} />
-      <div className="mt-8 w-full max-w-md">
+      <div className="sm:h-[500px] sm:w-[600px] md:h-[600px] md:w-[800px]">
+        <Lottie options={options} height={200} width={200} />
+      </div>
+
+      <div className="mt-8 w-full max-w-md px-4 sm:px-6 md:px-8">
         <Progress
           value={progress}
           className="bg-gray-300 h-6 rounded-lg overflow-hidden shadow-lg"
