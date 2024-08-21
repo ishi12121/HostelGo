@@ -1,6 +1,6 @@
 {
   "short_name": "Hostel Go",
-  "name": "production app for hostel go",
+  "name": "Create Hostel Go Sample",
   "icons": [
     {
       "src": "hostel.ico",
@@ -13,7 +13,7 @@
       "sizes": "192x192"
     },
     {
-      "src": "hostel.png",
+      "src": "hostel1.png",
       "type": "image/png",
       "sizes": "512x512"
     }
