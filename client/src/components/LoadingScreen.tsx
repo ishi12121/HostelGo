@@ -30,25 +30,27 @@ const LoadingScreen: React.FC = () => {
   }, []);
 
   return (
-    <>
-      <div
-        className="fixed top-0 left-0 w-full h-full bg-white flex flex-col items-center justify-center z-50"
-        style={{ display: progress < 100 ? "flex" : "none" }}
-      >
+    <div
+      className={`fixed top-0 left-0 w-full h-full bg-white flex flex-col items-center justify-center z-50 ${
+        progress < 100 ? "flex" : "hidden"
+      }`}
+    >
+      <div className="sm:h-[500px] sm:w-[600px] md:h-[600px] md:w-[800px]">
         <Lottie options={options} height={200} width={200} />
-        <div className="mt-8 w-full max-w-md">
-          <Progress
-            value={progress}
-            className="bg-gray-300 h-6 rounded-lg overflow-hidden shadow-lg"
-          >
-            <div
-              className="bg-gradient-to-r from-blue-500 to-blue-700 h-full transition-all duration-300"
-              style={{ width: `${progress}%` }}
-            ></div>
-          </Progress>
-        </div>
       </div>
-    </>
+
+      <div className="mt-8 w-full max-w-md px-4 sm:px-6 md:px-8">
+        <Progress
+          value={progress}
+          className="bg-gray-300 h-6 rounded-lg overflow-hidden shadow-lg"
+        >
+          <div
+            className="bg-gradient-to-r from-blue-500 to-blue-700 h-full transition-all duration-300"
+            style={{ width: `${progress}%` }}
+          ></div>
+        </Progress>
+      </div>
+    </div>
   );
 };
 
