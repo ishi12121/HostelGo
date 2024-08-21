@@ -1,1 +1,1 @@
-export const baseURL = "https://hostelgo-production.up.railway.app";
+export const baseURL = "http://localhost:3030";
